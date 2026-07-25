@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jyot.Dev</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+ <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    inter: ['Inter', 'sans-serif'],
+                    jetbrains: ['JetBrains Mono', 'monospace'],
+                },
+                colors: {
+                    accent: {
+                        DEFAULT: '#22d3ee',
+                        light: '#67e8f9',
+                    
+                    },
+                surface: {
+                    DEFAULT: '#0a0a0f',
+                    raised: '#12121a',
+                    card: '#16161f',
+                    border: '#1e1e2a',
+                }
+            }
+        }
+    }
+}
+</script>
+      <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: #1e1e2a #0a0a0f;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0f;
+      color: #d4d4d8;
+      overflow-x: hidden;
+    }
+
+    ::selection {
+      background: rgba(34, 211, 238, 0.2);
+      color: #fff;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0a0f; }
+    ::-webkit-scrollbar-thumb { background: #1e1e2a; border-radius: 3px; }
+
+    /* Nav */
+    .nav-glass {
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid #1e1e2a;
+    }
+
+    .nav-link {
+      color: #71717a;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+      text-decoration: none;
+    }
+
+    .nav-link:hover { color: #e4e4e7; }
+
+    .logo-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #22d3ee;
+      letter-spacing: -0.02em;
+    }
+
+    /* Hero */
+    .hero-name {
+      font-size: clamp(2.5rem, 7vw, 5.5rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .hero-name .dot { color: #22d3ee; }
+
+    /* Section headings */
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #22d3ee;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-top: 0.375rem;
+    }
+
+    .divider {
+      height: 1px;
+      background: #1e1e2a;
+    }
+
+    /* Cards */
+    .card {
+      background: #16161f;
+      border: 1px solid #1e1e2a;
+      border-radius: 14px;
+      padding: 1.25rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: #2a2a3a;
+    }
+
+    /* Skill tags */
+    .skill-tag {
+      display: inline-block;
+      background: #12121a;
+      border: 1px solid #1e1e2a;
+      border-radius: 8px;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8125rem;
+      color: #a1a1aa;
+      transition: all 0.2s ease;
+    }
+
+    .skill-tag:hover {
+      color: #67e8f9;
+      border-color: rgba(34, 211, 238, 0.2);
+    }
+
+    /* Project cards */
+    .project-card {
+      background: #16161f;
+      border: 1px solid #1e1e2a;
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+
+    .project-card:hover {
+      border-color: #2a2a3a;
+    }
+
+    .project-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-bottom: 1px solid #1e1e2a;
+    }
+
+    .status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.625rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 5px;
+    }
+
+    .status-active {
+      background: rgba(34, 211, 238, 0.1);
+      color: #22d3ee;
+    }
+
+    .status-building {
+      background: rgba(250, 204, 21, 0.1);
+      color: #facc15;
+    }
+
+    .status-planned {
+      background: rgba(161, 161, 170, 0.08);
+      color: #71717a;
+    }
+
+    /* Buttons */
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #22d3ee;
+      color: #0a0a0f;
+      font-weight: 600;
+      font-size: 0.8125rem;
+      padding: 0.625rem 1.5rem;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .cta-btn:hover {
+      background: #67e8f9;
+    }
+
+    .ghost-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      color: #71717a;
+      font-weight: 500;
+      font-size: 0.8125rem;
+      padding: 0.625rem 1.5rem;
+      border-radius: 10px;
+      border: 1px solid #1e1e2a;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .ghost-btn:hover {
+      color: #e4e4e7;
+      border-color: #2a2a3a;
+    }
+
+    /* Social */
+    .social-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #16161f;
+      border: 1px solid #1e1e2a;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #52525b;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .social-icon:hover {
+      color: #22d3ee;
+      border-color: rgba(34, 211, 238, 0.2);
+    }
+
+    /* Footer */
+    .footer-link {
+      color: #52525b;
+      font-size: 0.75rem;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-link:hover { color: #a1a1aa; }
+
+    /* Reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-d1 { transition-delay: 80ms; }
+    .reveal-d2 { transition-delay: 160ms; }
+    .reveal-d3 { transition-delay: 240ms; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .nav-desktop { display: none; }
+      .nav-mobile-btn { display: flex; }
+    }
+
+    @media (min-width: 769px) {
+      .nav-mobile-btn { display: none; }
+      .mobile-menu { display: none !important; }
+    }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 60px;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 15, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #1e1e2a;
+      padding: 1.25rem;
+      z-index: 49;
+    }
+
+    .mobile-menu.open { display: flex; }
+
+    .mobile-menu a {
+      color: #a1a1aa;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      padding: 0.625rem 0;
+      display: block;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .mobile-menu a:hover { color: #22d3ee; }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Form inputs */
+    input, textarea {
+      font-family: 'Inter', sans-serif;
+    }
+</style>
+</head>
+<body>
+  <!-- Nav -->
+  <nav class="nav-glass fixed top-0 left-0 right-0 z-50 h-[60px]">
+    <div class="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
+      <a href="#" class="logo-text text-base">jyot<span class="text-white">.dev</span></a>
+      <div class="nav-desktop flex items-center gap-7">
+        <a href="#about" class="nav-link">about</a>
+        <a href="#skills" class="nav-link">skills</a>
+        <a href="#projects" class="nav-link">projects</a>
+        <a href="#contact" class="nav-link">contact</a>
+      </div>
+      <button class="nav-mobile-btn items-center justify-center w-9 h-9 rounded-lg border border-surface-border text-zinc-500 hover:text-accent transition-all" onclick="toggleMobileMenu()" aria-label="Menu">
+        <iconify-icon icon="lucide:menu" id="menu-icon" width="18"></iconify-icon>
+      </button>
+    </div>
+</nav>
+
+<div class="mobile-menu flex-col gap-1" id="mobile-menu">
+    <a href="#about" onclick="closeMobileMenu()">about</a>
+    <a href="#skills" onclick="closeMobileMenu()">skills</a>
+    <a href="#projects" onclick="closeMobileMenu()">projects</a>
+    <a href="#contact" onclick="closeMobileMenu()">contact</a>
+</div>
+
+<section class="min-h-screen flex items-center pt-[60px]" id="hero">
+    <div class="max-w-5xl mx-auto px-6 w-full">
+      <div class="reveal">
+        <p class="mono text-sm text-zinc-500 mb-4">hey, i'm</p>
+      </div>
+      <div class="reveal reveal-d1">
+        <h1 class="hero-name">Jyot Patel<span class="dot">.</span></h1>
+      </div>
+      <div class="reveal reveal-d2">
+        <p class="text-zinc-500 text-lg mt-5 max-w-lg leading-relaxed">
+          I'm 14, live in the US, and mess around with hardware and software. I like taking stuff apart and sometimes I even put it back together.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-3 mt-8 reveal reveal-d3">
+        <a href="#projects" class="cta-btn">
+          Projects
+          <iconify-icon icon="lucide:arrow-down" width="16"></iconify-icon>
+        </a>
+        <a href="#contact" class="ghost-btn">
+          Shoot me a message
+        </a>
+      </div>
+    </div>
+</section>
+<section class="py-20" id="about">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="reveal">
+        <div class="section-label">About</div>
+        <h2 class="section-title">A bit about me</h2>
+      </div>
+
+      <div class="grid lg:grid-cols-5 gap-10 mt-10">
+        <div class="lg:col-span-3 reveal reveal-d1">
+          <p class="text-zinc-400 leading-relaxed">
+            I was born in India, stayed there for maybe 3 months, then made the move and grew up in Canada. Moved to the US in June 2025 because we couldn't get enough. Three countries later and I still can't figure out which one I like the most. I guess I'll just say I'm from everywhere.
+          </p>
+          <p class="text-zinc-500 leading-relaxed mt-4">
+            I got into tech because I kept wondering what was actually going on inside things. At the ripe age of 8, I started tinkering and coding in basic python and html after my grandpa gave me my first laptop. It was nothing much but a crappy celeron but at that time it was pretty powerful.
+          </p>
+          <p class="text-zinc-500 leading-relaxed mt-4">
+            When I'm not at my desk I'm probably outside touching grass, or reading about some cool github projects I could never make. Or staring at a half-soldered board trying to figure out what went wrong.
+          </p>
+        </div>
+        <div class="lg:col-span-2 space-y-3 reveal reveal-d2">
+            <div class="card">
+            <p class="mono text-xs text-zinc-600 mb-1">location</p>
+            <p class="text-zinc-300 text-sm">United States</p>
+          </div>
+          <div class="card">
+            <p class="mono text-xs text-zinc-600 mb-1">age</p>
+            <p class="text-zinc-300 text-sm">14</p>
+          </div>
+          <div class="card">
+            <p class="mono text-xs text-zinc-600 mb-1">focus</p>
+            <p class="text-zinc-300 text-sm">Hardware & Software</p>
+          </div>
+          <div class="card">
+            <p class="mono text-xs text-zinc-600 mb-1">originally from</p>
+            <p class="text-zinc-300 text-sm">India, then Canada, now the US</p>
+          </div>
+        </div>
+    </div>
+</div>
+</section>
+<div class="divider max-w-5xl mx-auto"></div>
+
+<section class="py-20" id="skills">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="reveal">
+        <div class="section-label">Skills</div>
+        <h2 class="section-title">What I work with</h2>
+      </div>
+
+      <div class="space-y-8 mt-10">
+        <div class="reveal reveal-d1">
+          <p class="text-white text-sm font-medium mb-3">Hardware</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="skill-tag">PCB Design</span>
+            <span class="skill-tag">Soldering</span>
+            <span class="skill-tag">Microcontrollers</span>
+            <span class="skill-tag">Circuits</span>
+            <span class="skill-tag">IoT</span>
+            <span class="skill-tag">Arduino</span>
+          </div>
+        </div>
+        <div class="reveal reveal-d2">
+          <p class="text-white text-sm font-medium mb-3">Software</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">JavaScript</span>
+            <span class="skill-tag">HTML/CSS</span>
+            <span class="skill-tag">Node.js</span>
+            <span class="skill-tag">Shell</span>
+            <span class="skill-tag">C++</span>
+          </div>
+        </div>
+        <div class="reveal reveal-d3">
+          <p class="text-white text-sm font-medium mb-3">Tools</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="skill-tag">Git</span>
+            <span class="skill-tag">GitHub</span>
+            <span class="skill-tag">Linux</span>
+            <span class="skill-tag">VS Code</span>
+            <span class="skill-tag">KiCad</span>
+            <span class="skill-tag">Figma</span>
+          </div>
+        </div>
+      </div>
+    </div>
+</section>
+
+<div class="divider max-w-5xl mx-auto"></div>
+
+<section class="py-20" id="projects">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="reveal">
+        <div class="section-label">Projects</div>
+        <h2 class="section-title">Stuff I've built (yet to be filled with future projects)</h2>
+      </div>
+    
+    <article class="project-card reveal reveal-d1">
+          <img src="image.png" alt="This Website Screenshot">
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-white font-medium text-sm">This Website</h3>
+              <span class="status status-active">Live</span>
+            </div>
+            <p class="text-zinc-500 text-xs leading-relaxed">Custom Handbuilt Website for my projects</p>
+            <div class="flex flex-wrap gap-1.5 mt-3">
+              <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded">HTML</span>
+              <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded">WEB</span>
+              <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded">CSS</span>
+            </div>
+            <div class="flex mt-5">
+            <a href="" class="cta-btn">
+                Source
+                <iconify-icon icon="lucide:arrow-right" width="16"></iconify-icon>
+            </a>
+            </div>
+          </div>
+    </article>
+    <article class="project-card reveal reveal-d2 mt-5">
+           <!-- <img src="" alt="">-->
+           <div class="p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-white font-medium text-sm">Future Project 1</h3>
+              <span class="status status-active">??</span>
+            </div>
+            <p class="text-zinc-500 text-xs leading-relaxed">Mysterious Future Project??</p>
+            <div class="flex flex-wrap gap-1.5 mt-3">
+              <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded"></span>
+              <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded"></span>
+              <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded"></span>
+            </div>
+            <div class="flex mt-5">
+           <!--<a href="" class="cta-btn">
+                Source
+                <iconify-icon icon="lucide:arrow-right" width="16"></iconify-icon>
+            </a>-->
+            </div>
+          </div>
+    </article>
+        <article class="project-card reveal reveal-d3 mt-5">
+          <!-- <img src="" alt="">-->
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-white font-medium text-sm">Future Project 2</h3>
+              <span class="status status-active">??</span>
+            </div>
+            <p class="text-zinc-500 text-xs leading-relaxed">Mysterious Future Project??</p>
+            <div class="flex flex-wrap gap-1.5 mt-3">
+              <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded"></span>
+              <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded"></span>
+              <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded"></span>
+            </div>
+            <div class="flex mt-5">
+           <!--<a href="" class="cta-btn">
+                Source
+                <iconify-icon icon="lucide:arrow-right" width="16"></iconify-icon>
+            </a>-->
+            </div>
+          </div>
+    </article>
+    
+    </div>
+</section>
+<section class="py-20" id="contact">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="reveal">
+        <div class="section-label">Contact</div>
+        <h2 class="section-title">Get in touch</h2>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-10 mt-10">
+        <!--FORM DOES NOT WORK WITHOUT PROPER DOMAIN-->
+        <div class="reveal reveal-d1">
+          <p class="text-zinc-500 leading-relaxed">
+            Want to talk about something, or just say hi? Send a message. I check my email more than I probably should.
+          </p>
+
+          <address class="mt-6 space-y-3 not-italic">
+            <div class="flex items-center gap-2.5">
+              <iconify-icon icon="lucide:mail" width="14" class="text-zinc-600"></iconify-icon>
+              <span class="mono text-sm text-zinc-400">hello@jyot.dev</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <iconify-icon icon="lucide:map-pin" width="14" class="text-zinc-600"></iconify-icon>
+              <span class="text-sm text-zinc-400">United States</span>
+            </div>
+          </address>
+
+          <div class="flex gap-2.5 mt-6">
+            <a href="#" class="social-icon" aria-label="GitHub" rel="me">
+              <iconify-icon icon="lucide:github" width="16"></iconify-icon>
+            </a>
+            <a href="mailto:hello@jyot.dev" class="social-icon" aria-label="Email">
+              <iconify-icon icon="lucide:mail" width="16"></iconify-icon>
+            </a>
+          </div>
+        </div>
+
+        <div class="reveal reveal-d2">
+          <form id="contact-form" class="space-y-3.5">
+            <div>
+              <label class="mono text-xs text-zinc-600 block mb-1">Name</label>
+              <input type="text" name="name" required placeholder="Your name"
+                class="w-full bg-surface-card border border-surface-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-accent/30 transition-colors">
+            </div>
+            <div>
+              <label class="mono text-xs text-zinc-600 block mb-1">Email</label>
+              <input type="email" name="email" required placeholder="you@example.com"
+                class="w-full bg-surface-card border border-surface-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-accent/30 transition-colors">
+            </div>
+            <div>
+              <label class="mono text-xs text-zinc-600 block mb-1">Message</label>
+              <textarea name="message" required rows="4" placeholder="What's up?"
+                class="w-full bg-surface-card border border-surface-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-accent/30 transition-colors resize-none"></textarea>
+            </div>
+            <button type="submit" class="cta-btn">
+              Send
+              <iconify-icon icon="lucide:send" width="14"></iconify-icon>
+            </button>
+          </form>
+
+          <div id="form-success" class="hidden mt-3 p-3.5 rounded-xl bg-accent/5 border border-accent/15">
+            <p class="text-accent text-sm">Got it. I'll reply when I can.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+</section>
+<footer class="border-t border-surface-border py6">
+    <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-3">
+      <p class="text-zinc-500 text-sm">&copy; JyotP, Built with love in 2026</p>
+      <div class="flex items-center gap-5">
+        <a href="#hero" class="footer-link">home</a>
+        <a href="#about" class="footer-link">about</a>
+        <a href="#projects" class="footer-link">projects</a>
+        <a href="#contact" class="footer-link">contact</a>
+      </div>
+    </div>
+</footer>
+<script>
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      const icon = document.getElementById('menu-icon');
+      menu.classList.toggle('open');
+      icon.setAttribute('icon', menu.classList.contains('open') ? 'lucide:x' : 'lucide:menu');
+    }
+
+    function closeMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      const icon = document.getElementById('menu-icon');
+      menu.classList.remove('open');
+      icon.setAttribute('icon', 'lucide:menu');
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('active');
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - 70, behavior: 'smooth' });
+        }
+      });
+    });
+
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      this.style.display = 'none';
+      document.getElementById('form-success').classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
