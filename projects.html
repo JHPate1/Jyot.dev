@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects | Jyot.Dev</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        jetbrains: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        accent: {
+                            DEFAULT: '#22d3ee',
+                            light: '#67e8f9',
+                        },
+                        surface: {
+                            DEFAULT: '#0a0a0f',
+                            raised: '#12121a',
+                            card: '#16161f',
+                            border: '#1e1e2a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        
+        html {
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: #1e1e2a #0a0a0f;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #d4d4d8;
+            overflow-x: hidden;
+        }
+        
+        ::selection {
+            background: rgba(34, 211, 238, 0.2);
+            color: #fff;
+        }
+        
+        /* Nav */
+        .nav-glass {
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid #1e1e2a;
+        }
+        
+        .nav-link {
+            color: #71717a;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .nav-link:hover { color: #e4e4e7; }
+        
+        .logo-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: #22d3ee;
+            letter-spacing: -0.02em;
+        }
+        
+        /* Section headings */
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #22d3ee;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        
+        .section-title {
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #fff;
+            margin-top: 0.375rem;
+        }
+        
+        /* Project Grid */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .project-card {
+            background: #16161f;
+            border: 1px solid #1e1e2a;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+        
+        .project-card:hover {
+            border-color: #2a2a3a;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .project-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid #1e1e2a;
+            transition: transform 0.5s ease;
+        }
+        
+        .project-card:hover img {
+            transform: scale(1.05);
+        }
+        
+        .no-image {
+            height: 180px;
+            background: linear-gradient(135deg, #16161f 0%, #12121a 100%);
+            border-bottom: 1px solid #1e1e2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .status {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.625rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+        }
+        
+        .status-active {
+            background: rgba(34, 211, 238, 0.1);
+            color: #22d3ee;
+        }
+        
+        .status-building {
+            background: rgba(250, 204, 21, 0.1);
+            color: #facc15;
+        }
+        
+        .status-planned {
+            background: rgba(161, 161, 170, 0.08);
+            color: #71717a;
+        }
+        
+        /* Filters */
+        .filter-bar {
+            background: #16161f;
+            border: 1px solid #1e1e2a;
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            background: transparent;
+            color: #71717a;
+            border: 1px solid #1e1e2a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .filter-btn:hover {
+            color: #e4e4e7;
+            border-color: #2a2a3a;
+        }
+        
+        .filter-btn.active {
+            background: rgba(34, 211, 238, 0.1);
+            color: #22d3ee;
+            border-color: rgba(34, 211, 238, 0.3);
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.625rem 1rem;
+            border-radius: 8px;
+            background: #12121a;
+            border: 1px solid #1e1e2a;
+            color: #e4e4e7;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #22d3ee;
+        }
+        
+        .search-input::placeholder {
+            color: #52525b;
+        }
+        
+        /* Project Details Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal.open {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #16161f;
+            border: 1px solid #1e1e2a;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .modal-header {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .modal-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(10, 10, 15, 0.9);
+            border: 1px solid #1e1e2a;
+            color: #e4e4e7;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: #22d3ee;
+            color: #0a0a0f;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-stats {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1rem;
+            background: #12121a;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #71717a;
+        }
+        
+        /* Buttons */
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #22d3ee;
+            color: #0a0a0f;
+            font-weight: 600;
+            font-size: 0.8125rem;
+            padding: 0.625rem 1.5rem;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .cta-btn:hover {
+            background: #67e8f9;
+        }
+        
+        .ghost-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            color: #71717a;
+            font-weight: 500;
+            font-size: 0.8125rem;
+            padding: 0.625rem 1.5rem;
+            border-radius: 10px;
+            border: 1px solid #1e1e2a;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .ghost-btn:hover {
+            color: #e4e4e7;
+            border-color: #2a2a3a;
+        }
+        
+        /* Back to home */
+        .back-home {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 40;
+        }
+        
+        /* Fade/Slide animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .nav-desktop { display: none; }
+            .nav-mobile-btn { display: flex; }
+            .project-grid { grid-template-columns: 1fr; }
+            .modal { padding: 1rem; }
+        }
+        
+        @media (min-width: 769px) {
+            .nav-mobile-btn { display: none; }
+            .mobile-menu { display: none !important; }
+        }
+        
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #1e1e2a;
+            padding: 1.25rem;
+            z-index: 49;
+        }
+        
+        .mobile-menu.open { display: flex; }
+        
+        .mobile-menu a {
+            color: #a1a1aa;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            padding: 0.625rem 0;
+            display: block;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .mobile-menu a:hover { color: #22d3ee; }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Animated background */
+        .animated-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(34, 211, 238, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(34, 211, 238, 0.03) 0%, transparent 40%),
+                #0a0a0f;
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    
+    <!-- Navigation -->
+    <nav class="nav-glass fixed top-0 left-0 right-0 z-50 h-[60px]">
+        <div class="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
+            <a href="index.html" class="logo-text text-base">jyot<span class="text-white">.dev</span></a>
+            <div class="nav-desktop flex items-center gap-7">
+                <a href="index.html#about" class="nav-link">about</a>
+                <a href="index.html#skills" class="nav-link">skills</a>
+                <a href="projects.html" class="nav-link" style="color: #22d3ee;">projects</a>
+                <a href="index.html#contact" class="nav-link">contact</a>
+            </div>
+            <button class="nav-mobile-btn items-center justify-center w-9 h-9 rounded-lg border border-surface-border text-zinc-500 hover:text-accent transition-all" onclick="toggleMobileMenu()">
+                <iconify-icon icon="lucide:menu" width="18"></iconify-icon>
+            </button>
+        </div>
+    </nav>
+    
+    <div class="mobile-menu flex-col gap-1" id="mobile-menu">
+        <a href="index.html#about" onclick="closeMobileMenu()">about</a>
+        <a href="index.html#skills" onclick="closeMobileMenu()">skills</a>
+        <a href="projects.html" onclick="closeMobileMenu()">projects</a>
+        <a href="index.html#contact" onclick="closeMobileMenu()">contact</a>
+    </div>
+    
+    <!-- Main Content -->
+    <section class="pt-[120px] pb-20">
+        <div class="max-w-6xl mx-auto px-6">
+            
+            <!-- Header -->
+            <div class="reveal">
+                <p class="mono text-sm text-zinc-500 mb-2">portfolio</p>
+                <h1 class="section-title" style="font-size: clamp(2rem, 4vw, 3rem);">My Projects</h1>
+                <p class="text-zinc-500 mt-3 max-w-xl">Exploring hardware and software through experimentation, iteration, and curiosity.</p>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filter-bar reveal">
+                <div class="flex flex-wrap gap-2" id="status-filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="active">Active</button>
+                    <button class="filter-btn" data-filter="building">In Development</button>
+                    <button class="filter-btn" data-filter="planned">Planned</button>
+                </div>
+                <input type="text" class="search-input" placeholder="Search projects..." id="search-input">
+            </div>
+            
+            <!-- Stats Summary -->
+            <div class="reveal reveal-d1 mb-6">
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                    <div style="background: #16161f; border: 1px solid #1e1e2a; border-radius: 10px; padding: 1rem 1.5rem;">
+                        <p class="mono text-xs text-zinc-600 mb-1">Total Projects</p>
+                        <p class="text-2xl font-bold text-white" id="total-count">8</p>
+                    </div>
+                    <div style="background: #16161f; border: 1px solid #1e1e2a; border-radius: 10px; padding: 1rem 1.5rem;">
+                        <p class="mono text-xs text-zinc-600 mb-1">Active Now</p>
+                        <p class="text-2xl font-bold text-[#22d3ee]" id="active-count">3</p>
+                    </div>
+                    <div style="background: #16161f; border: 1px solid #1e1e2a; border-radius: 10px; padding: 1rem 1.5rem;">
+                        <p class="mono text-xs text-zinc-600 mb-1">Technologies Used</p>
+                        <p class="text-2xl font-bold text-[#facc15]" id="tech-count">12+</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Projects Grid -->
+            <div class="project-grid reveal reveal-d2" id="projects-grid">
+                <!-- Project cards injected via JS -->
+            </div>
+            
+            <!-- Load More (placeholder for future expansion) -->
+            <div class="text-center mt-12 reveal reveal-d3">
+                <button class="ghost-btn" id="load-more" style="display: none;">
+                    Load More Projects
+                    <iconify-icon icon="lucide:arrow-down" width="16"></iconify-icon>
+                </button>
+                <p class="text-zinc-600 text-sm mt-4 mono">More coming soon...</p>
+            </div>
+            
+        </div>
+    </section>
+    
+    <!-- Back to Home Button -->
+    <a href="index.html" class="back-home ghost-btn">
+        <iconify-icon icon="lucide:arrow-left" width="16"></iconify-icon>
+        Back to Home
+    </a>
+    
+    <!-- Modal Template (empty - filled via JS) -->
+    <div class="modal" id="project-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img id="modal-image" src="" alt="">
+                <button class="modal-close" onclick="closeModal()">
+                    <iconify-icon icon="lucide:x" width="18"></iconify-icon>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h2 id="modal-title" class="text-xl font-semibold text-white mb-1"></h2>
+                <span id="modal-status" class="status"></span>
+                
+                <p id="modal-description" class="text-zinc-400 mt-4 leading-relaxed"></p>
+                
+                <div class="modal-stats">
+                    <div class="stat-item">
+                        <p class="stat-value" id="modal-tech-count">0</p>
+                        <p class="stat-label">Tech Stack</p>
+                    </div>
+                    <div class="stat-item">
+                        <p class="stat-value" id="modal-months">0</p>
+                        <p class="stat-label">Months Active</p>
+                    </div>
+                    <div class="stat-item">
+                        <p class="stat-value" id="modal-stars">0</p>
+                        <p class="stat-label">GitHub Stars</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mt-4" id="modal-tags">
+                    <!-- Tags injected via JS -->
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <a id="modal-source" href="" class="cta-btn">
+                        <iconify-icon icon="lucide:github" width="16"></iconify-icon>
+                        View Source
+                    </a>
+                    <a id="modal-demo" href="" class="ghost-btn" style="display: none;">
+                        <iconify-icon icon="lucide:external-link" width="16"></iconify-icon>
+                        Live Demo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="border-t border-surface-border py-6">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-3">
+            <p class="text-zinc-500 text-sm">&copy; JyotP, Built with love in 2026</p>
+            <div class="flex items-center gap-5">
+                <a href="index.html#hero" class="footer-link">home</a>
+                <a href="index.html#about" class="footer-link">about</a>
+                <a href="projects.html" class="footer-link" style="color: #22d3ee;">projects</a>
+                <a href="index.html#contact" class="footer-link">contact</a>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Projects Data - Expand this as you add more projects
+        const projects = [
+            {
+                id: 1,
+                title: "This Website",
+                description: "Custom hand-built portfolio website featuring smooth animations, responsive design, and a modern dark aesthetic. Built from scratch with vanilla HTML, CSS, and JavaScript.",
+                status: "active",
+                image: "image.png",
+                noImage: false,
+                technologies: ["HTML", "CSS", "JavaScript", "Tailwind"],
+                months: 2,
+                stars: 0,
+                source: "",
+                demo: ""
+            },
+            {
+                id: 2,
+                title: "Smart Home IoT Controller",
+                description: "A centralized IoT hub for controlling home automation devices. Features MQTT integration, real-time dashboards, and voice control compatibility.",
+                status: "building",
+                image: "",
+                noImage: true,
+                technologies: ["Python", "ESP32", "MQTT", "React"],
+                months: 3,
+                stars: 0,
+                source: "",
+                demo: ""
+            },
+            {
+                id: 3,
+                title: "Portfolio v2 - React Version",
+                description: "Next iteration of the portfolio using React with TypeScript. Implements component-based architecture and improved performance.",
+                status: "planned",
+                image: "",
+                noImage: true,
+                technologies: ["React", "TypeScript", "Vite", "Framer Motion"],
+                months: 0,
+                stars: 0,
+                source: "",
+                demo: ""
+            },
+            {
+                id: 4,
+                title: "PCB Design Tool Helper",
+                description: "Browser-based PCB design assistant that helps validate footprints, check clearance rules, and generate BOM exports.",
+                status: "active",
+                image: "",
+                noImage: true,
+                technologies: ["JavaScript", "KiCad API", "Node.js"],
+                months: 4,
+                stars: 0,
+                source: "",
+                demo: ""
+            },
+            {
+                id: 5,
+                title: "Weather Station Dashboard",
+                description: "Real-time weather monitoring system with sensor data visualization. Collects temperature, humidity, pressure, and air quality metrics.",
+                status: "building",
+                image: "",
+                noImage: true,
+                technologies: ["Python", "Raspberry Pi", "Flask", "Chart.js"],
+                months: 2,
+                stars: 0,
+                source: "",
+                demo: ""
+            },
+            {
+                id: 6,
+                title: "Task Management CLI",
+                description: "Command-line task manager with markdown support, priority sorting, and calendar integration. Lightweight alternative to complex project management tools.",
+                status: "active",
+                image: "",
+                noImage: true,
+                technologies: ["Python", "Click", "SQLite"],
+                months: 5,
+                stars: 0,
+                source: "",
+                demo: ""
+            },
+            {
+                id: 7,
+                title: "3D Printer Firmware Mod",
+                description: "Custom Marlin firmware modifications for improved print quality, faster speeds, and enhanced safety features on Ender 3 printers.",
+                status: "planned",
+                image: "",
+                noImage: true,
+                technologies: ["C++", "Marlin", "STM32"],
+                months: 0,
+                stars: 0,
+                source: "",
+                demo: ""
+            },
+            {
+                id: 8,
+                title: "Discord Bot - Developer Utilities",
+                description: "Discord bot providing developer-focused utilities: code snippet formatting, GitHub integration, npm package lookup, and team coordination features.",
+                status: "building",
+                image: "",
+                noImage: true,
+                technologies: ["Node.js", "Discord.js", "MongoDB"],
+                months: 1,
+                stars: 0,
+                source: "",
+                demo: ""
+            }
+        ];
+        
+        // State
+        let currentFilter = "all";
+        let searchTerm = "";
+        
+        // DOM Elements
+        const projectsGrid = document.getElementById("projects-grid");
+        const modal = document.getElementById("project-modal");
+        const totalCount = document.getElementById("total-count");
+        const activeCount = document.getElementById("active-count");
+        
+        // Initialize
+        function init() {
+            renderStats();
+            renderProjects(projects);
+            setupFilters();
+            setupSearch();
+            setupScrollAnimation();
+        }
+        
+        // Render Stats
+        function renderStats() {
+            totalCount.textContent = projects.length;
+            activeCount.textContent = projects.filter(p => p.status === "active").length;
+        }
+        
+        // Render Projects
+        function renderProjects(projectList) {
+            if (projectList.length === 0) {
+                projectsGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <p class="text-zinc-500">No projects found matching your criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            projectsGrid.innerHTML = projectList.map(project => `
+                <article class="project-card" onclick="openModal(${project.id})">
+                    ${project.noImage ? 
+                        `<div class="no-image">
+                            <iconify-icon icon="lucide:box" width="48" color="#22d3ee"></iconify-icon>
+                         </div>` : 
+                        `<img src="${project.image}" alt="${project.title}">`
+                    }
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-white font-medium text-sm">${project.title}</h3>
+                            <span class="status status-${project.status}">
+                                ${project.status === "active" ? "Active" : project.status === "building" ? "Building" : "Planned"}
+                            </span>
+                        </div>
+                        <p class="text-zinc-500 text-xs leading-relaxed line-clamp-2">${project.description}</p>
+                        <div class="flex flex-wrap gap-1.5 mt-3">
+                            ${project.technologies.slice(0, 3).map(tech => `
+                                <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded">${tech}</span>
+                            `).join("")}
+                            ${project.technologies.length > 3 ? `
+                                <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded">+${project.technologies.length - 3}</span>
+                            ` : ""}
+                        </div>
+                    </div>
+                </article>
+            `).join("");
+        }
+        
+        // Setup Filters
+        function setupFilters() {
+            const filterBtns = document.querySelectorAll(".filter-btn");
+            filterBtns.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    filterBtns.forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    currentFilter = btn.dataset.filter;
+                    filterProjects();
+                });
+            });
+        }
+        
+        // Setup Search
+        function setupSearch() {
+            const searchInput = document.getElementById("search-input");
+            searchInput.addEventListener("input", (e) => {
+                searchTerm = e.target.value.toLowerCase();
+                filterProjects();
+            });
+        }
+        
+        // Filter Projects
+        function filterProjects() {
+            let filtered = [...projects];
+            
+            if (currentFilter !== "all") {
+                filtered = filtered.filter(p => p.status === currentFilter);
+            }
+            
+            if (searchTerm) {
+                filtered = filtered.filter(p => 
+                    p.title.toLowerCase().includes(searchTerm) ||
+                    p.description.toLowerCase().includes(searchTerm) ||
+                    p.technologies.some(t => t.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            renderProjects(filtered);
+        }
+        
+        // Open Modal
+        function openModal(id) {
+            const project = projects.find(p => p.id === id);
+            if (!project) return;
+            
+            document.getElementById("modal-image").src = project.noImage ? "" : project.image;
+            document.getElementById("modal-image").parentElement.style.display = project.noImage ? "none" : "block";
+            document.getElementById("modal-title").textContent = project.title;
+            document.getElementById("modal-status").className = `status status-${project.status}`;
+            document.getElementById("modal-status").textContent = project.status === "active" ? "Active" : project.status === "building" ? "In Development" : "Planned";
+            document.getElementById("modal-description").textContent = project.description;
+            document.getElementById("modal-tech-count").textContent = project.technologies.length;
+            document.getElementById("modal-months").textContent = project.months;
+            document.getElementById("modal-stars").textContent = project.stars;
+            document.getElementById("modal-source").href = project.source;
+            document.getElementById("modal-demo").style.display = project.demo ? "inline-flex" : "none";
+            document.getElementById("modal-demo").href = project.demo;
+            document.getElementById("modal-tags").innerHTML = project.technologies.map(tech => 
+                `<span class="skill-tag">${tech}</span>`
+            ).join("");
+            
+            modal.classList.add("open");
+            document.body.style.overflow = "hidden";
+        }
+        
+        // Close Modal
+        function closeModal() {
+            modal.classList.remove("open");
+            document.body.style.overflow = "";
+        }
+        
+        // Close on ESC or click outside
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeModal();
+        });
+        
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeModal();
+        });
+        
+        // Scroll Animation
+        function setupScrollAnimation() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) entry.target.classList.add("active");
+                });
+            }, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
+            
+            document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+        }
+        
+        // Mobile Menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById("mobile-menu");
+            const icon = document.querySelector("#mobile-menu + button iconify-icon");
+            menu.classList.toggle("open");
+            icon.setAttribute("icon", menu.classList.contains("open") ? "lucide:x" : "lucide:menu");
+        }
+        
+        function closeMobileMenu() {
+            document.getElementById("mobile-menu").classList.remove("open");
+            document.querySelector("#mobile-menu + button iconify-icon").setAttribute("icon", "lucide:menu");
+        }
+        
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
