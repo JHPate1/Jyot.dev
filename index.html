@@ -319,6 +319,170 @@
     input, textarea {
       font-family: 'Inter', sans-serif;
     }
+          .animated-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(34, 211, 238, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(34, 211, 238, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 40% 80%, rgba(34, 211, 238, 0.06) 0%, transparent 50%),
+    #0a0a0f;
+  animation: bgPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes bgPulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+/* Hero typing effect */
+.typing-cursor::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* Enhanced card glow on hover */
+.card, .project-card {
+  position: relative;
+}
+
+.card::before, .project-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, transparent, rgba(34, 211, 238, 0.3), transparent);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background-size: 200% 200%;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.card:hover::before, .project-card:hover::before {
+  opacity: 1;
+}
+
+/* Skill tag floating animation */
+.skill-tag {
+  transform-origin: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skill-tag:hover {
+  transform: translateY(-3px) scale(1.05);
+}
+
+/* Project card image parallax effect */
+.project-card img {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Glowing button effect */
+.cta-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.cta-btn:hover::after {
+  transform: translateX(100%);
+}
+
+/* Particles for hero */
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(34, 211, 238, 0.4);
+  border-radius: 50%;
+  animation: float 15s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+}
+
+/* Section divider animation */
+.divider {
+  position: relative;
+  overflow: hidden;
+}
+
+.divider::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #22d3ee, transparent);
+  width: 100%;
+  animation: divideLine 4s ease-in-out infinite;
+}
+
+@keyframes divideLine {
+  0% { opacity: 0; width: 0; left: 50%; }
+  50% { opacity: 1; width: 100%; left: 0; }
+  100% { opacity: 0; width: 0; left: 50%; }
+}
+
+/* Magnetic cursor effect for buttons */
+@media (hover: hover) {
+  .cta-btn, .ghost-btn, .social-icon {
+    cursor: none;
+  }
+}
+
+.custom-cursor {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #22d3ee;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1000;
+  transform: translate(-50%, -50%);
+  transition: all 0.15s ease;
+  mix-blend-mode: difference;
+}
+
+.custom-cursor.hover {
+  width: 40px;
+  height: 40px;
+  background: rgba(34, 211, 238, 0.1);
+}
 </style>
 </head>
 <body>
@@ -608,6 +772,9 @@
       </div>
     </div>
 </footer>
+<div class="custom-cursor" id="cursor"></div>
+<div class="particles" id="particles"></div>
+<div class="animated-bg"></div>
 <script>
     function toggleMobileMenu() {
       const menu = document.getElementById('mobile-menu');
@@ -646,6 +813,85 @@
       this.style.display = 'none';
       document.getElementById('form-success').classList.remove('hidden');
     });
+    // Custom cursor
+const cursor = document.getElementById('cursor');
+if (cursor) {
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  
+  document.querySelectorAll('.cta-btn, .ghost-btn, .social-icon, .nav-link').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+}
+
+// Typing effect for hero
+const heroName = document.querySelector('.hero-name');
+if (heroName) {
+  const text = heroName.textContent;
+  heroName.textContent = '';
+  let i = 0;
+  heroName.classList.add('typing-cursor');
+  
+  const typeInterval = setInterval(() => {
+    if (i < text.length) {
+      heroName.textContent += text.charAt(i);
+      i++;
+    } else {
+      clearInterval(typeInterval);
+      setTimeout(() => {
+        heroName.classList.remove('typing-cursor');
+      }, 500);
+    }
+  }, 50);
+}
+
+// Generate particles
+const particleContainer = document.getElementById('particles');
+if (particleContainer) {
+  for (let i = 0; i < 20; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.top = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 15 + 's';
+    particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+    particleContainer.appendChild(particle);
+  }
+}
+
+// Tilt effect for cards
+document.querySelectorAll('.card, .project-card').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const rotateX = (y - centerY) / 20;
+    const rotateY = (centerX - x) / 20;
+    
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  });
+  
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+  });
+});
+
+// Form validation enhancement
+document.getElementById('contact-form').addEventListener('input', function(e) {
+  if (e.target.value.trim()) {
+    e.target.classList.add('filled');
+    e.target.style.borderColor = '#22d3ee';
+  } else {
+    e.target.classList.remove('filled');
+    e.target.style.borderColor = '';
+  }
+});
   </script>
 </body>
 </html>
