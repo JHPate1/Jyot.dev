@@ -1,3 +1,4 @@
+#### THIS SITE IS CURRENTLY HOSTED ON AWS AMPLIFY
 # Jyot.dev
 
 My personal portfolio website.  
@@ -14,10 +15,6 @@ To be completely fair, I have alot more ambitious upgrades which will take over 
 - Tailwind CSS
 - Custom CSS
 - Vanilla JavaScript
-
-## Why One File
-
-If I do host this on a real domain, I would use infinityfree for hosting and they have limited "hits" so I cant afford making the website bulky with files or I can run out of usage pretty quickly. Thats why the CSS and JS are all in one HTML file.
 
 ## Features
 
