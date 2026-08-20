@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- psst... the konami code works here too. -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects | Jyot.Dev</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
     <script>
         tailwind.config = {
             theme: {
@@ -27,457 +28,242 @@
                             raised: '#12121a',
                             card: '#16161f',
                             border: '#1e1e2a',
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
     </script>
-    
+
     <style>
         *, *::before, *::after { box-sizing: border-box; }
-        
-        html {
-            scroll-behavior: smooth;
-            scrollbar-width: thin;
-            scrollbar-color: #1e1e2a #0a0a0f;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #0a0a0f;
-            color: #d4d4d8;
-            overflow-x: hidden;
-        }
-        
-        ::selection {
-            background: rgba(34, 211, 238, 0.2);
-            color: #fff;
-        }
-        
-        /* Nav */
-        .nav-glass {
-            background: rgba(10, 10, 15, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid #1e1e2a;
-        }
-        
-        .nav-link {
-            color: #71717a;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            transition: color 0.2s ease;
-            text-decoration: none;
-        }
-        
+        html { scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #1e1e2a #0a0a0f; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #d4d4d8; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        ::selection { background: rgba(34, 211, 238, 0.2); color: #fff; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0f; }
+        ::-webkit-scrollbar-thumb { background: #1e1e2a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2a2a3a; }
+
+        .scroll-progress { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg, #22d3ee, #67e8f9); z-index: 100; width: 0%; transition: width 0.1s ease-out; box-shadow: 0 0 8px rgba(34, 211, 238, 0.3); }
+
+        .nav-glass { background: rgba(10, 10, 15, 0.72); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%); border-bottom: 1px solid rgba(30, 30, 42, 0.6); }
+        .nav-link { color: #71717a; font-size: 0.8125rem; font-weight: 500; transition: color 0.25s ease; text-decoration: none; position: relative; }
+        .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: #22d3ee; transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .nav-link:hover { color: #e4e4e7; }
-        
-        .logo-text {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            color: #22d3ee;
-            letter-spacing: -0.02em;
-        }
-        
-        /* Section headings */
-        .section-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #22d3ee;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-        
-        .section-title {
-            font-size: clamp(1.5rem, 2.5vw, 2rem);
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            color: #fff;
-            margin-top: 0.375rem;
-        }
-        
-        /* Project Grid */
-        .project-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .project-card {
-            background: #16161f;
-            border: 1px solid #1e1e2a;
-            border-radius: 14px;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            cursor: pointer;
-        }
-        
-        .project-card:hover {
-            border-color: #2a2a3a;
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        
-        .project-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-bottom: 1px solid #1e1e2a;
-            transition: transform 0.5s ease;
-        }
-        
-        .project-card:hover img {
-            transform: scale(1.05);
-        }
-        
-        .no-image {
-            height: 180px;
-            background: linear-gradient(135deg, #16161f 0%, #12121a 100%);
-            border-bottom: 1px solid #1e1e2a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .status {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.625rem;
-            font-weight: 500;
-            letter-spacing: 0.04em;
-            padding: 0.2rem 0.5rem;
-            border-radius: 5px;
-        }
-        
-        .status-active {
-            background: rgba(34, 211, 238, 0.1);
-            color: #22d3ee;
-        }
-        
-        .status-building {
-            background: rgba(250, 204, 21, 0.1);
-            color: #facc15;
-        }
-        
-        .status-planned {
-            background: rgba(161, 161, 170, 0.08);
-            color: #71717a;
-        }
-        
-        /* Filters */
-        .filter-bar {
-            background: #16161f;
-            border: 1px solid #1e1e2a;
-            border-radius: 12px;
-            padding: 1rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-        
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            background: transparent;
-            color: #71717a;
-            border: 1px solid #1e1e2a;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .filter-btn:hover {
-            color: #e4e4e7;
-            border-color: #2a2a3a;
-        }
-        
-        .filter-btn.active {
-            background: rgba(34, 211, 238, 0.1);
-            color: #22d3ee;
-            border-color: rgba(34, 211, 238, 0.3);
-        }
-        
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 0.625rem 1rem;
-            border-radius: 8px;
-            background: #12121a;
-            border: 1px solid #1e1e2a;
-            color: #e4e4e7;
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: #22d3ee;
-        }
-        
-        .search-input::placeholder {
-            color: #52525b;
-        }
-        
-        /* Project Details Modal */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .modal.open {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: #16161f;
-            border: 1px solid #1e1e2a;
-            border-radius: 16px;
-            max-width: 700px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        
-        .modal-header {
-            position: relative;
-            height: 200px;
-            overflow: hidden;
-        }
-        
-        .modal-header img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(10, 10, 15, 0.9);
-            border: 1px solid #1e1e2a;
-            color: #e4e4e7;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-        
-        .modal-close:hover {
-            background: #22d3ee;
-            color: #0a0a0f;
-        }
-        
-        .modal-body {
-            padding: 1.5rem;
-        }
-        
-        .modal-stats {
-            display: flex;
-            gap: 1.5rem;
-            padding: 1rem;
-            background: #12121a;
-            border-radius: 10px;
-            margin: 1rem 0;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #fff;
-        }
-        
-        .stat-label {
-            font-size: 0.75rem;
-            color: #71717a;
-        }
-        
-        /* Buttons */
-        .cta-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #22d3ee;
-            color: #0a0a0f;
-            font-weight: 600;
-            font-size: 0.8125rem;
-            padding: 0.625rem 1.5rem;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
-        
-        .cta-btn:hover {
-            background: #67e8f9;
-        }
-        
-        .ghost-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: transparent;
-            color: #71717a;
-            font-weight: 500;
-            font-size: 0.8125rem;
-            padding: 0.625rem 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #1e1e2a;
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
-        
-        .ghost-btn:hover {
-            color: #e4e4e7;
-            border-color: #2a2a3a;
-        }
-        
-        /* Back to home */
-        .back-home {
-            position: fixed;
-            bottom: 2rem;
-            left: 2rem;
-            z-index: 40;
-        }
-        
-        /* Fade/Slide animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .reveal {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* Mobile */
+        .nav-link:hover::after { width: 100%; }
+        .nav-link.active { color: #22d3ee; }
+        .nav-link.active::after { width: 100%; }
+        .logo-text { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #22d3ee; letter-spacing: -0.02em; transition: filter 0.3s ease, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; display: inline-block; text-decoration: none; }
+        .logo-text:hover { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.4)); }
+        .logo-text.spinning { transform: rotate(720deg) scale(1.3); }
+
+        .section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 500; color: #22d3ee; letter-spacing: 0.06em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .section-label::before { content: ''; width: 20px; height: 1px; background: #22d3ee; }
+        .section-title { font-size: clamp(1.5rem, 2.5vw, 2rem); font-weight: 600; letter-spacing: -0.02em; color: #fff; margin-top: 0.5rem; }
+
+        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; margin-top: 2rem; }
+        .project-card { background: #16161f; border: 1px solid #1e1e2a; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease; cursor: pointer; }
+        .project-card:hover { border-color: rgba(34, 211, 238, 0.15); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 24px rgba(34, 211, 238, 0.04); transform: translateY(-3px); }
+        .project-card .img-wrap { overflow: hidden; position: relative; }
+        .project-card img { width: 100%; height: 180px; object-fit: cover; border-bottom: 1px solid #1e1e2a; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .project-card:hover img { transform: scale(1.06); }
+        .project-card .img-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 10, 15, 0.6), transparent 40%); pointer-events: none; }
+        .no-image { height: 180px; background: linear-gradient(135deg, #16161f 0%, #12121a 100%); border-bottom: 1px solid #1e1e2a; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .no-image::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(34, 211, 238, 0.04), transparent 60%); }
+        .no-image iconify-icon { position: relative; z-index: 1; transition: transform 0.4s ease; }
+        .project-card:hover .no-image iconify-icon { transform: scale(1.1) rotate(-5deg); }
+
+        .status { font-family: 'JetBrains Mono', monospace; font-size: 0.625rem; font-weight: 500; letter-spacing: 0.04em; padding: 0.2rem 0.5rem; border-radius: 5px; display: inline-flex; align-items: center; gap: 0.3rem; }
+        .status-active { background: rgba(34, 211, 238, 0.1); color: #22d3ee; }
+        .status-active::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #22d3ee; animation: statusPulse 2s ease-in-out infinite; }
+        @keyframes statusPulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.4); } 50% { opacity: 0.6; box-shadow: 0 0 0 4px rgba(34, 211, 238, 0); } }
+        .status-building { background: rgba(250, 204, 21, 0.1); color: #facc15; }
+        .status-building::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #facc15; animation: statusPulse 2s ease-in-out infinite; }
+        .status-planned { background: rgba(161, 161, 170, 0.08); color: #71717a; }
+
+        .filter-bar { background: #16161f; border: 1px solid #1e1e2a; border-radius: 14px; padding: 1rem 1.25rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1.5rem; }
+        .filter-btn { padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.8125rem; font-weight: 500; background: transparent; color: #71717a; border: 1px solid #1e1e2a; cursor: pointer; transition: all 0.25s ease; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .filter-btn:hover { color: #e4e4e7; border-color: #2a2a3a; }
+        .filter-btn.active { background: rgba(34, 211, 238, 0.1); color: #22d3ee; border-color: rgba(34, 211, 238, 0.3); }
+        .search-input { flex: 1; min-width: 180px; padding: 0.625rem 1rem; border-radius: 8px; background: #12121a; border: 1px solid #1e1e2a; color: #e4e4e7; font-size: 0.875rem; transition: all 0.25s ease; font-family: 'Inter', sans-serif; }
+        .search-input:focus { outline: none; border-color: rgba(34, 211, 238, 0.3); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.06); }
+        .search-input::placeholder { color: #52525b; }
+
+        .stat-card { background: #16161f; border: 1px solid #1e1e2a; border-radius: 12px; padding: 1rem 1.5rem; transition: border-color 0.35s ease, box-shadow 0.35s ease; }
+        .stat-card:hover { border-color: rgba(34, 211, 238, 0.15); box-shadow: 0 0 24px rgba(34, 211, 238, 0.04); }
+
+        .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 2rem; }
+        .modal.open { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { background: #16161f; border: 1px solid #1e1e2a; border-radius: 16px; max-width: 700px; width: 100%; max-height: 85vh; overflow-y: auto; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 0 60px rgba(34, 211, 238, 0.06); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .modal-header { position: relative; height: 200px; overflow: hidden; }
+        .modal-header img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-header.no-img { height: 80px; background: linear-gradient(135deg, #16161f, #12121a); display: flex; align-items: center; padding: 0 1.5rem; }
+        .modal-close { position: absolute; top: 1rem; right: 1rem; width: 36px; height: 36px; border-radius: 50%; background: rgba(10, 10, 15, 0.9); border: 1px solid #1e1e2a; color: #e4e4e7; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; z-index: 2; }
+        .modal-close:hover { background: #22d3ee; color: #0a0a0f; transform: rotate(90deg); }
+        .modal-body { padding: 1.5rem; }
+        .modal-stats { display: flex; gap: 1.5rem; padding: 1rem; background: #12121a; border-radius: 10px; margin: 1rem 0; border: 1px solid #1e1e2a; }
+        .stat-item { text-align: center; flex: 1; }
+        .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 600; color: #fff; }
+        .stat-label { font-size: 0.75rem; color: #71717a; margin-top: 0.25rem; }
+
+        .cta-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: #22d3ee; color: #0a0a0f; font-weight: 600; font-size: 0.8125rem; padding: 0.625rem 1.5rem; border-radius: 10px; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); text-decoration: none; position: relative; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        .cta-btn:hover { background: #67e8f9; box-shadow: 0 0 24px rgba(34, 211, 238, 0.25); transform: translateY(-1px); }
+        .cta-btn:active { transform: translateY(0); }
+        .cta-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent); transform: translateX(-100%); transition: transform 0.6s ease; }
+        .cta-btn:hover::after { transform: translateX(100%); }
+        .ghost-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: transparent; color: #71717a; font-weight: 500; font-size: 0.8125rem; padding: 0.625rem 1.5rem; border-radius: 10px; border: 1px solid #1e1e2a; transition: all 0.25s ease; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+        .ghost-btn:hover { color: #e4e4e7; border-color: #2a2a3a; background: #12121a; }
+
+        .back-home { position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 40; -webkit-tap-highlight-color: transparent; }
+        .back-to-top { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 40px; height: 40px; border-radius: 12px; background: #16161f; border: 1px solid #1e1e2a; display: flex; align-items: center; justify-content: center; color: #71717a; z-index: 48; opacity: 0; pointer-events: none; transition: all 0.3s ease; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+        .back-to-top.visible { opacity: 1; pointer-events: auto; }
+        .back-to-top:hover { color: #22d3ee; border-color: rgba(34, 211, 238, 0.2); transform: translateY(-2px); }
+
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .reveal-d1 { transition-delay: 80ms; }
+        .reveal-d2 { transition-delay: 160ms; }
+        .reveal-d3 { transition-delay: 240ms; }
+
+        @media (max-width: 768px) { .nav-desktop { display: none; } .nav-mobile-btn { display: flex; } }
+        @media (min-width: 769px) { .nav-mobile-btn { display: none; } .mobile-menu { display: none !important; } }
+        .mobile-menu { display: none; position: fixed; top: 60px; left: 0; right: 0; background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid #1e1e2a; padding: 1.25rem; z-index: 49; flex-direction: column; gap: 0.25rem; }
+        .mobile-menu.open { display: flex; animation: menuSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes menuSlide { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .mobile-menu a { color: #a1a1aa; font-weight: 500; font-size: 0.9375rem; padding: 0.75rem 0; display: block; text-decoration: none; transition: color 0.2s ease; border-bottom: 1px solid rgba(30, 30, 42, 0.4); }
+        .mobile-menu a:last-child { border-bottom: none; }
+        .mobile-menu a:hover { color: #22d3ee; }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        input, textarea { font-family: 'Inter', sans-serif; font-size: 16px; }
+
+        /* Loading skeleton */
+        .skeleton-card { background: #16161f; border: 1px solid #1e1e2a; border-radius: 14px; overflow: hidden; }
+        .skeleton-img { height: 180px; background: linear-gradient(90deg, #12121a 25%, #1a1a24 50%, #12121a 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        .skeleton-line { height: 12px; border-radius: 4px; background: linear-gradient(90deg, #12121a 25%, #1a1a24 50%, #12121a 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; margin: 12px 16px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Error state */
+        .error-state { text-align: center; padding: 4rem 2rem; }
+        .error-state iconify-icon { color: #ef4444; margin-bottom: 1rem; }
+
+        /* ══ NIGHT SKY ══ */
+        .night-sky { position: fixed; inset: 0; z-index: -3; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(20, 25, 45, 0.4) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 85% 30%, rgba(30, 20, 50, 0.25) 0%, transparent 50%), radial-gradient(ellipse 50% 50% at 15% 70%, rgba(15, 30, 50, 0.2) 0%, transparent 50%), linear-gradient(180deg, #08080d 0%, #0a0a12 40%, #0a0a0f 100%); transition: filter 0.5s ease; }
+        .milky-way { position: fixed; inset: 0; z-index: -2; background: linear-gradient(115deg, transparent 30%, rgba(60, 70, 100, 0.04) 42%, rgba(80, 90, 130, 0.06) 50%, rgba(60, 70, 100, 0.04) 58%, transparent 70%); filter: blur(40px); opacity: 0.7; pointer-events: none; }
+        .moon-glow { position: fixed; top: 8%; right: 6%; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(200, 210, 230, 0.06) 0%, rgba(200, 210, 230, 0.02) 40%, transparent 70%); z-index: -2; pointer-events: auto; cursor: pointer; transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .moon-glow.boom { width: 400px; height: 400px; background: radial-gradient(circle, rgba(200, 210, 230, 0.18) 0%, rgba(200, 210, 230, 0.06) 40%, transparent 70%); }
+        @media (max-width: 768px) { .moon-glow { width: 80px; height: 80px; top: 5%; right: 4%; } .moon-glow.boom { width: 260px; height: 260px; } }
+        .grid-overlay { position: fixed; inset: 0; z-index: -1; background-image: linear-gradient(rgba(34, 211, 238, 0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 211, 238, 0.012) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%); -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%); pointer-events: none; }
+        .stars-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+        .star { position: absolute; border-radius: 50%; animation: twinkle ease-in-out infinite; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
+        .star-bright { position: absolute; animation: twinkle ease-in-out infinite; }
+        .star-bright::before, .star-bright::after { content: ''; position: absolute; top: 50%; left: 50%; background: currentColor; border-radius: 1px; }
+        .star-bright::before { width: 100%; height: 1px; transform: translate(-50%, -50%); box-shadow: 0 0 4px currentColor; }
+        .star-bright::after { width: 1px; height: 100%; transform: translate(-50%, -50%); box-shadow: 0 0 4px currentColor; }
+        .shooting-star { position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; opacity: 0; box-shadow: 0 0 6px #fff; }
+        .shooting-star::after { content: ''; position: absolute; top: 0; left: 0; width: 80px; height: 1px; background: linear-gradient(90deg, #fff, transparent); transform-origin: left center; transform: rotate(45deg) translateX(-100%); opacity: 0.6; }
+
+        .custom-cursor { position: fixed; width: 20px; height: 20px; border: 2px solid #22d3ee; border-radius: 50%; pointer-events: none; z-index: 1000; transform: translate(-50%, -50%); transition: width 0.2s ease, height 0.2s ease, background 0.2s ease; mix-blend-mode: difference; }
+        .custom-cursor.hover { width: 40px; height: 40px; background: rgba(34, 211, 238, 0.1); }
+        @media (hover: none) { .custom-cursor { display: none !important; } }
+        @media (hover: hover) { .cta-btn, .ghost-btn, .nav-link, .filter-btn, .project-card, .search-input { cursor: none; } }
+
+        /* ══ EASTER EGGS ══ */
+        .toast-container { position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.625rem; pointer-events: none; }
+        @media (max-width: 768px) { .toast-container { bottom: 5rem; left: 1rem; right: 1rem; } }
+        .toast { display: flex; align-items: center; gap: 0.75rem; background: rgba(22, 22, 31, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(34, 211, 238, 0.2); border-radius: 12px; padding: 0.875rem 1.25rem; color: #e4e4e7; font-size: 0.875rem; font-weight: 500; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 24px rgba(34, 211, 238, 0.06); transform: translateX(-120%); opacity: 0; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; pointer-events: auto; max-width: 360px; }
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast.hide { transform: translateX(-120%); opacity: 0; }
+        .toast iconify-icon { color: #22d3ee; flex-shrink: 0; }
+        .toast.gold { border-color: rgba(250, 204, 21, 0.3); }
+        .toast.gold iconify-icon { color: #facc15; }
+        .toast.purple { border-color: rgba(168, 85, 247, 0.3); }
+        .toast.purple iconify-icon { color: #a855f7; }
+        .toast.green { border-color: rgba(34, 197, 94, 0.3); }
+        .toast.green iconify-icon { color: #22c55e; }
+
+        .matrix-overlay { position: fixed; inset: 0; z-index: 9998; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; }
+        .matrix-overlay.active { opacity: 1; pointer-events: auto; }
+        .matrix-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .matrix-exit-hint { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: rgba(34, 197, 94, 0.6); z-index: 9999; opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
+        .matrix-exit-hint.show { opacity: 1; }
+        body.matrix-mode { animation: matrixTint 0.5s ease forwards; }
+        @keyframes matrixTint { to { filter: hue-rotate(90deg) saturate(1.5); } }
+        body.matrix-mode .night-sky { filter: hue-rotate(90deg) brightness(0.5); }
+        body.matrix-mode .stars-container { opacity: 0.3; }
+        .burst-particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9997; }
+        body.gravity-mode .star, body.gravity-mode .star-bright { animation: gravityFall 2.5s ease-in forwards !important; }
+        @keyframes gravityFall { 0% { transform: translateY(0); } 100% { transform: translateY(110vh); opacity: 0; } }
+        .ripple { position: fixed; border-radius: 50%; border: 2px solid rgba(34, 211, 238, 0.4); pointer-events: none; z-index: 9996; }
+
         @media (max-width: 768px) {
-            .nav-desktop { display: none; }
-            .nav-mobile-btn { display: flex; }
+            .project-card { transform: none !important; }
             .project-grid { grid-template-columns: 1fr; }
             .modal { padding: 1rem; }
+            .modal-stats { flex-direction: column; gap: 0.75rem; }
+            .stat-item { display: flex; align-items: center; justify-content: space-between; text-align: left; }
+            .stat-item .stat-value { font-size: 1rem; }
+            .back-to-top { bottom: 1rem; right: 1rem; width: 36px; height: 36px; }
+            .back-home { bottom: 1rem; left: 1rem; }
+            .back-home .ghost-btn { padding: 0.5rem 1rem; font-size: 0.75rem; }
         }
-        
-        @media (min-width: 769px) {
-            .nav-mobile-btn { display: none; }
-            .mobile-menu { display: none !important; }
-        }
-        
-        .mobile-menu {
-            display: none;
-            position: fixed;
-            top: 60px;
-            left: 0;
-            right: 0;
-            background: rgba(10, 10, 15, 0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid #1e1e2a;
-            padding: 1.25rem;
-            z-index: 49;
-        }
-        
-        .mobile-menu.open { display: flex; }
-        
-        .mobile-menu a {
-            color: #a1a1aa;
-            font-weight: 500;
-            font-size: 0.9375rem;
-            padding: 0.625rem 0;
-            display: block;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-        
-        .mobile-menu a:hover { color: #22d3ee; }
-        
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        
-        /* Animated background */
-        .animated-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -2;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(34, 211, 238, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(34, 211, 238, 0.03) 0%, transparent 40%),
-                #0a0a0f;
-        }
+        .cta-btn, .ghost-btn, .nav-link, .back-to-top, .filter-btn { -webkit-user-select: none; user-select: none; }
+        @supports (padding: env(safe-area-inset-bottom)) { footer { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); } .back-to-top { bottom: calc(1.5rem + env(safe-area-inset-bottom)); } }
     </style>
 </head>
 <body>
-    <div class="animated-bg"></div>
-    
-    <!-- Navigation -->
+    <div class="scroll-progress" id="scroll-progress"></div>
+
     <nav class="nav-glass fixed top-0 left-0 right-0 z-50 h-[60px]">
         <div class="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
-            <a href="index.html" class="logo-text text-base">jyot<span class="text-white">.dev</span></a>
+            <a href="index.html" class="logo-text text-base" id="logo">jyot<span class="text-white">.dev</span></a>
             <div class="nav-desktop flex items-center gap-7">
                 <a href="index.html#about" class="nav-link">about</a>
                 <a href="index.html#skills" class="nav-link">skills</a>
-                <a href="projects.html" class="nav-link" style="color: #22d3ee;">projects</a>
+                <a href="projects.html" class="nav-link active">projects</a>
                 <a href="index.html#contact" class="nav-link">contact</a>
             </div>
-            <button class="nav-mobile-btn items-center justify-center w-9 h-9 rounded-lg border border-surface-border text-zinc-500 hover:text-accent transition-all" onclick="toggleMobileMenu()">
-                <iconify-icon icon="lucide:menu" width="18"></iconify-icon>
+            <button class="nav-mobile-btn items-center justify-center w-9 h-9 rounded-lg border border-surface-border text-zinc-500 hover:text-accent transition-all" onclick="toggleMobileMenu()" aria-label="Menu">
+                <iconify-icon icon="lucide:menu" id="menu-icon" width="18"></iconify-icon>
             </button>
         </div>
     </nav>
-    
-    <div class="mobile-menu flex-col gap-1" id="mobile-menu">
+
+    <div class="mobile-menu" id="mobile-menu">
         <a href="index.html#about" onclick="closeMobileMenu()">about</a>
         <a href="index.html#skills" onclick="closeMobileMenu()">skills</a>
         <a href="projects.html" onclick="closeMobileMenu()">projects</a>
         <a href="index.html#contact" onclick="closeMobileMenu()">contact</a>
     </div>
-    
-    <!-- Main Content -->
-    <section class="pt-[120px] pb-20">
-        <div class="max-w-6xl mx-auto px-6">
-            
-            <!-- Header -->
+
+    <section class="pt-[100px] pb-20 px-6">
+        <div class="max-w-6xl mx-auto">
             <div class="reveal">
-                <p class="mono text-sm text-zinc-500 mb-2">portfolio</p>
+                <div class="section-label">Portfolio</div>
                 <h1 class="section-title" style="font-size: clamp(2rem, 4vw, 3rem);">My Projects</h1>
-                <p class="text-zinc-500 mt-3 max-w-xl">Exploring hardware and software through experimentation, iteration, and curiosity.</p>
+                <p class="text-zinc-500 mt-3 max-w-xl text-sm md:text-base">Exploring hardware and software through experimentation, iteration, and curiosity.</p>
             </div>
-            
-            <!-- Filters -->
-            <div class="filter-bar reveal">
+
+            <div class="reveal reveal-d1 mt-8 flex flex-wrap gap-3">
+                <div class="stat-card">
+                    <p class="mono text-xs text-zinc-600 mb-1">Total Projects</p>
+                    <p class="text-2xl font-bold text-white" id="total-count">—</p>
+                </div>
+                <div class="stat-card">
+                    <p class="mono text-xs text-zinc-600 mb-1">Active Now</p>
+                    <p class="text-2xl font-bold" style="color: #22d3ee;" id="active-count">—</p>
+                </div>
+                <div class="stat-card">
+                    <p class="mono text-xs text-zinc-600 mb-1">Technologies</p>
+                    <p class="text-2xl font-bold" style="color: #facc15;" id="tech-count">—</p>
+                </div>
+            </div>
+
+            <div class="filter-bar reveal reveal-d2 mt-6">
                 <div class="flex flex-wrap gap-2" id="status-filters">
                     <button class="filter-btn active" data-filter="all">All</button>
                     <button class="filter-btn" data-filter="active">Active</button>
@@ -486,52 +272,33 @@
                 </div>
                 <input type="text" class="search-input" placeholder="Search projects..." id="search-input">
             </div>
-            
-            <!-- Stats Summary -->
-            <div class="reveal reveal-d1 mb-6">
-                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-                    <div style="background: #16161f; border: 1px solid #1e1e2a; border-radius: 10px; padding: 1rem 1.5rem;">
-                        <p class="mono text-xs text-zinc-600 mb-1">Total Projects</p>
-                        <p class="text-2xl font-bold text-white" id="total-count">8</p>
-                    </div>
-                    <div style="background: #16161f; border: 1px solid #1e1e2a; border-radius: 10px; padding: 1rem 1.5rem;">
-                        <p class="mono text-xs text-zinc-600 mb-1">Active Now</p>
-                        <p class="text-2xl font-bold text-[#22d3ee]" id="active-count">3</p>
-                    </div>
-                    <div style="background: #16161f; border: 1px solid #1e1e2a; border-radius: 10px; padding: 1rem 1.5rem;">
-                        <p class="mono text-xs text-zinc-600 mb-1">Technologies Used</p>
-                        <p class="text-2xl font-bold text-[#facc15]" id="tech-count">12+</p>
-                    </div>
-                </div>
+
+            <div class="project-grid reveal reveal-d3" id="projects-grid">
+                <!-- Loading skeletons -->
+                <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line" style="width: 60%;"></div><div class="skeleton-line" style="width: 90%;"></div><div class="skeleton-line" style="width: 40%;"></div></div>
+                <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line" style="width: 60%;"></div><div class="skeleton-line" style="width: 90%;"></div><div class="skeleton-line" style="width: 40%;"></div></div>
+                <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line" style="width: 60%;"></div><div class="skeleton-line" style="width: 90%;"></div><div class="skeleton-line" style="width: 40%;"></div></div>
             </div>
-            
-            <!-- Projects Grid -->
-            <div class="project-grid reveal reveal-d2" id="projects-grid">
-                <!-- Project cards injected via JS -->
-            </div>
-            
-            <!-- Load More (placeholder for future expansion) -->
+
             <div class="text-center mt-12 reveal reveal-d3">
-                <button class="ghost-btn" id="load-more" style="display: none;">
-                    Load More Projects
-                    <iconify-icon icon="lucide:arrow-down" width="16"></iconify-icon>
-                </button>
-                <p class="text-zinc-600 text-sm mt-4 mono">More coming soon...</p>
+                <p class="text-zinc-600 text-sm mono">More coming soon...</p>
             </div>
-            
         </div>
     </section>
-    
-    <!-- Back to Home Button -->
+
     <a href="index.html" class="back-home ghost-btn">
         <iconify-icon icon="lucide:arrow-left" width="16"></iconify-icon>
         Back to Home
     </a>
-    
-    <!-- Modal Template (empty - filled via JS) -->
+
+    <a href="#" class="back-to-top" id="back-to-top" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">
+        <iconify-icon icon="lucide:arrow-up" width="18"></iconify-icon>
+    </a>
+
+    <!-- Modal -->
     <div class="modal" id="project-modal">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header" id="modal-header">
                 <img id="modal-image" src="" alt="">
                 <button class="modal-close" onclick="closeModal()">
                     <iconify-icon icon="lucide:x" width="18"></iconify-icon>
@@ -540,9 +307,7 @@
             <div class="modal-body">
                 <h2 id="modal-title" class="text-xl font-semibold text-white mb-1"></h2>
                 <span id="modal-status" class="status"></span>
-                
-                <p id="modal-description" class="text-zinc-400 mt-4 leading-relaxed"></p>
-                
+                <p id="modal-description" class="text-zinc-400 mt-4 leading-relaxed text-sm"></p>
                 <div class="modal-stats">
                     <div class="stat-item">
                         <p class="stat-value" id="modal-tech-count">0</p>
@@ -557,199 +322,122 @@
                         <p class="stat-label">GitHub Stars</p>
                     </div>
                 </div>
-                
-                <div class="flex flex-wrap gap-2 mt-4" id="modal-tags">
-                    <!-- Tags injected via JS -->
-                </div>
-                
-                <div class="flex gap-3 mt-6">
-                    <a id="modal-source" href="" class="cta-btn">
-                        <iconify-icon icon="lucide:github" width="16"></iconify-icon>
-                        View Source
-                    </a>
-                    <a id="modal-demo" href="" class="ghost-btn" style="display: none;">
-                        <iconify-icon icon="lucide:external-link" width="16"></iconify-icon>
-                        Live Demo
-                    </a>
-                </div>
+                <div class="flex flex-wrap gap-2 mt-4" id="modal-tags"></div>
+                <div class="flex flex-wrap gap-3 mt-6" id="modal-buttons"></div>
             </div>
         </div>
     </div>
-    
-    <!-- Footer -->
+
     <footer class="border-t border-surface-border py-6">
         <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-3">
-            <p class="text-zinc-500 text-sm">&copy; JyotP, Built with love in 2026</p>
+            <p class="text-zinc-500 text-sm text-center md:text-left">&copy; JyotP, Built with love in 2026</p>
             <div class="flex items-center gap-5">
-                <a href="index.html#hero" class="footer-link">home</a>
-                <a href="index.html#about" class="footer-link">about</a>
-                <a href="projects.html" class="footer-link" style="color: #22d3ee;">projects</a>
-                <a href="index.html#contact" class="footer-link">contact</a>
+                <a href="index.html#hero" class="text-zinc-500 text-xs hover:text-zinc-400 transition-colors">home</a>
+                <a href="index.html#about" class="text-zinc-500 text-xs hover:text-zinc-400 transition-colors">about</a>
+                <a href="projects.html" class="text-xs transition-colors" style="color: #22d3ee;">projects</a>
+                <a href="index.html#contact" class="text-zinc-500 text-xs hover:text-zinc-400 transition-colors">contact</a>
             </div>
         </div>
     </footer>
-    
+
+    <!-- Easter egg layers -->
+    <div class="toast-container" id="toast-container"></div>
+    <div class="matrix-overlay" id="matrix-overlay"><canvas class="matrix-canvas" id="matrix-canvas"></canvas></div>
+    <div class="matrix-exit-hint" id="matrix-exit-hint">press ESC to exit the matrix</div>
+
+    <!-- Night sky layers -->
+    <div class="custom-cursor" id="cursor"></div>
+    <div class="stars-container" id="stars-container"></div>
+    <div class="shooting-stars" id="shooting-stars"></div>
+    <div class="grid-overlay"></div>
+    <div class="moon-glow" id="moon-glow"></div>
+    <div class="milky-way"></div>
+    <div class="night-sky"></div>
+
     <script>
-        // Projects Data - Expand this as you add more projects
-        const projects = [
-            {
-                id: 1,
-                title: "This Website",
-                description: "Custom hand-built portfolio website featuring smooth animations, responsive design, and a modern dark aesthetic. Built from scratch with vanilla HTML, CSS, and JavaScript.",
-                status: "active",
-                image: "image.png",
-                noImage: false,
-                technologies: ["HTML", "CSS", "JavaScript", "Tailwind"],
-                months: 2,
-                stars: 0,
-                source: "",
-                demo: ""
-            },
-            {
-                id: 2,
-                title: "Smart Home IoT Controller",
-                description: "A centralized IoT hub for controlling home automation devices. Features MQTT integration, real-time dashboards, and voice control compatibility.",
-                status: "building",
-                image: "",
-                noImage: true,
-                technologies: ["Python", "ESP32", "MQTT", "React"],
-                months: 3,
-                stars: 0,
-                source: "",
-                demo: ""
-            },
-            {
-                id: 3,
-                title: "Portfolio v2 - React Version",
-                description: "Next iteration of the portfolio using React with TypeScript. Implements component-based architecture and improved performance.",
-                status: "planned",
-                image: "",
-                noImage: true,
-                technologies: ["React", "TypeScript", "Vite", "Framer Motion"],
-                months: 0,
-                stars: 0,
-                source: "",
-                demo: ""
-            },
-            {
-                id: 4,
-                title: "PCB Design Tool Helper",
-                description: "Browser-based PCB design assistant that helps validate footprints, check clearance rules, and generate BOM exports.",
-                status: "active",
-                image: "",
-                noImage: true,
-                technologies: ["JavaScript", "KiCad API", "Node.js"],
-                months: 4,
-                stars: 0,
-                source: "",
-                demo: ""
-            },
-            {
-                id: 5,
-                title: "Weather Station Dashboard",
-                description: "Real-time weather monitoring system with sensor data visualization. Collects temperature, humidity, pressure, and air quality metrics.",
-                status: "building",
-                image: "",
-                noImage: true,
-                technologies: ["Python", "Raspberry Pi", "Flask", "Chart.js"],
-                months: 2,
-                stars: 0,
-                source: "",
-                demo: ""
-            },
-            {
-                id: 6,
-                title: "Task Management CLI",
-                description: "Command-line task manager with markdown support, priority sorting, and calendar integration. Lightweight alternative to complex project management tools.",
-                status: "active",
-                image: "",
-                noImage: true,
-                technologies: ["Python", "Click", "SQLite"],
-                months: 5,
-                stars: 0,
-                source: "",
-                demo: ""
-            },
-            {
-                id: 7,
-                title: "3D Printer Firmware Mod",
-                description: "Custom Marlin firmware modifications for improved print quality, faster speeds, and enhanced safety features on Ender 3 printers.",
-                status: "planned",
-                image: "",
-                noImage: true,
-                technologies: ["C++", "Marlin", "STM32"],
-                months: 0,
-                stars: 0,
-                source: "",
-                demo: ""
-            },
-            {
-                id: 8,
-                title: "Discord Bot - Developer Utilities",
-                description: "Discord bot providing developer-focused utilities: code snippet formatting, GitHub integration, npm package lookup, and team coordination features.",
-                status: "building",
-                image: "",
-                noImage: true,
-                technologies: ["Node.js", "Discord.js", "MongoDB"],
-                months: 1,
-                stars: 0,
-                source: "",
-                demo: ""
+        // ════════════════════════════════════════════
+        // DATA LOADING
+        // ════════════════════════════════════════════
+        let projects = [];
+        let statsData = { technologies: "0" };
+
+        async function loadProjects() {
+            try {
+                const response = await fetch('projects.json');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                projects = data.projects || [];
+                statsData = data.stats || { technologies: "0" };
+                return true;
+            } catch (err) {
+                console.error('Failed to load projects.json:', err);
+                showError();
+                return false;
             }
-        ];
-        
-        // State
+        }
+
+        function showError() {
+            const grid = document.getElementById('projects-grid');
+            grid.innerHTML = `
+                <div class="error-state col-span-full">
+                    <iconify-icon icon="lucide:cloud-off" width="48"></iconify-icon>
+                    <p class="text-zinc-500 text-sm mt-2">Couldn't load projects.</p>
+                    <p class="text-zinc-700 text-xs mt-1 mono">Make sure projects.json exists and it's accessible.</p>
+                </div>
+            `;
+        }
+
+        // ════════════════════════════════════════════
+        // STATE
+        // ════════════════════════════════════════════
         let currentFilter = "all";
         let searchTerm = "";
-        
-        // DOM Elements
+
         const projectsGrid = document.getElementById("projects-grid");
         const modal = document.getElementById("project-modal");
-        const totalCount = document.getElementById("total-count");
-        const activeCount = document.getElementById("active-count");
-        
-        // Initialize
-        function init() {
-            renderStats();
-            renderProjects(projects);
-            setupFilters();
-            setupSearch();
-            setupScrollAnimation();
-        }
-        
-        // Render Stats
+
+        // ════════════════════════════════════════════
+        // RENDER
+        // ════════════════════════════════════════════
         function renderStats() {
-            totalCount.textContent = projects.length;
-            activeCount.textContent = projects.filter(p => p.status === "active").length;
+            document.getElementById("total-count").textContent = projects.length;
+            document.getElementById("active-count").textContent = projects.filter(p => p.status === "active").length;
+            document.getElementById("tech-count").textContent = statsData.technologies;
         }
-        
-        // Render Projects
+
+        function statusLabel(status) {
+            return status === "active" ? "Active" : status === "building" ? "Building" : "Planned";
+        }
+
+        function statusLabelLong(status) {
+            return status === "active" ? "Active" : status === "building" ? "In Development" : "Planned";
+        }
+
         function renderProjects(projectList) {
             if (projectList.length === 0) {
                 projectsGrid.innerHTML = `
-                    <div class="col-span-full text-center py-12">
-                        <p class="text-zinc-500">No projects found matching your criteria.</p>
+                    <div class="col-span-full text-center py-16">
+                        <iconify-icon icon="lucide:search-x" width="40" class="text-zinc-700 mb-3"></iconify-icon>
+                        <p class="text-zinc-500 text-sm">No projects found.</p>
                     </div>
                 `;
                 return;
             }
-            
+
             projectsGrid.innerHTML = projectList.map(project => `
                 <article class="project-card" onclick="openModal(${project.id})">
-                    ${project.noImage ? 
+                    ${project.noImage ?
                         `<div class="no-image">
-                            <iconify-icon icon="lucide:box" width="48" color="#22d3ee"></iconify-icon>
-                         </div>` : 
-                        `<img src="${project.image}" alt="${project.title}">`
+                            <iconify-icon icon="lucide:box" width="48" style="color: #22d3ee; opacity: 0.5;"></iconify-icon>
+                         </div>` :
+                        `<div class="img-wrap"><img src="${project.image}" alt="${project.title}" loading="lazy"></div>`
                     }
-                    <div class="p-4">
+                    <div class="p-4 flex flex-col flex-1">
                         <div class="flex items-center justify-between mb-2">
                             <h3 class="text-white font-medium text-sm">${project.title}</h3>
-                            <span class="status status-${project.status}">
-                                ${project.status === "active" ? "Active" : project.status === "building" ? "Building" : "Planned"}
-                            </span>
+                            <span class="status status-${project.status}">${statusLabel(project.status)}</span>
                         </div>
-                        <p class="text-zinc-500 text-xs leading-relaxed line-clamp-2">${project.description}</p>
+                        <p class="text-zinc-500 text-xs leading-relaxed" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${project.description}</p>
                         <div class="flex flex-wrap gap-1.5 mt-3">
                             ${project.technologies.slice(0, 3).map(tech => `
                                 <span class="mono text-[10px] text-zinc-600 bg-surface-raised px-1.5 py-0.5 rounded">${tech}</span>
@@ -761,115 +449,497 @@
                     </div>
                 </article>
             `).join("");
+
+            // Re-attach cursor hover for dynamically rendered cards
+            if (!isTouchDevice && cursor) {
+                document.querySelectorAll('.project-card').forEach(el => {
+                    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+                });
+            }
         }
-        
-        // Setup Filters
+
+        // ════════════════════════════════════════════
+        // FILTERING
+        // ════════════════════════════════════════════
         function setupFilters() {
-            const filterBtns = document.querySelectorAll(".filter-btn");
-            filterBtns.forEach(btn => {
+            document.querySelectorAll(".filter-btn").forEach(btn => {
                 btn.addEventListener("click", () => {
-                    filterBtns.forEach(b => b.classList.remove("active"));
+                    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
                     btn.classList.add("active");
                     currentFilter = btn.dataset.filter;
                     filterProjects();
                 });
             });
         }
-        
-        // Setup Search
+
         function setupSearch() {
-            const searchInput = document.getElementById("search-input");
-            searchInput.addEventListener("input", (e) => {
+            document.getElementById("search-input").addEventListener("input", (e) => {
                 searchTerm = e.target.value.toLowerCase();
                 filterProjects();
             });
         }
-        
-        // Filter Projects
+
         function filterProjects() {
             let filtered = [...projects];
-            
-            if (currentFilter !== "all") {
-                filtered = filtered.filter(p => p.status === currentFilter);
-            }
-            
+            if (currentFilter !== "all") filtered = filtered.filter(p => p.status === currentFilter);
             if (searchTerm) {
-                filtered = filtered.filter(p => 
+                filtered = filtered.filter(p =>
                     p.title.toLowerCase().includes(searchTerm) ||
                     p.description.toLowerCase().includes(searchTerm) ||
                     p.technologies.some(t => t.toLowerCase().includes(searchTerm))
                 );
             }
-            
             renderProjects(filtered);
         }
-        
-        // Open Modal
+
+        // ════════════════════════════════════════════
+        // MODAL — fully dynamic buttons from JSON
+        // ════════════════════════════════════════════
         function openModal(id) {
             const project = projects.find(p => p.id === id);
             if (!project) return;
-            
-            document.getElementById("modal-image").src = project.noImage ? "" : project.image;
-            document.getElementById("modal-image").parentElement.style.display = project.noImage ? "none" : "block";
+
+            const header = document.getElementById("modal-header");
+            const modalImg = document.getElementById("modal-image");
+
+            if (project.noImage) {
+                header.classList.add("no-img");
+                modalImg.style.display = "none";
+            } else {
+                header.classList.remove("no-img");
+                modalImg.style.display = "block";
+                modalImg.src = project.image;
+                modalImg.alt = project.title;
+            }
+
             document.getElementById("modal-title").textContent = project.title;
-            document.getElementById("modal-status").className = `status status-${project.status}`;
-            document.getElementById("modal-status").textContent = project.status === "active" ? "Active" : project.status === "building" ? "In Development" : "Planned";
+            const statusEl = document.getElementById("modal-status");
+            statusEl.className = `status status-${project.status}`;
+            statusEl.textContent = statusLabelLong(project.status);
             document.getElementById("modal-description").textContent = project.description;
             document.getElementById("modal-tech-count").textContent = project.technologies.length;
             document.getElementById("modal-months").textContent = project.months;
             document.getElementById("modal-stars").textContent = project.stars;
-            document.getElementById("modal-source").href = project.source;
-            document.getElementById("modal-demo").style.display = project.demo ? "inline-flex" : "none";
-            document.getElementById("modal-demo").href = project.demo;
-            document.getElementById("modal-tags").innerHTML = project.technologies.map(tech => 
-                `<span class="skill-tag">${tech}</span>`
+
+            // Tech tags
+            document.getElementById("modal-tags").innerHTML = project.technologies.map(tech =>
+                `<span class="mono text-[10px] text-zinc-400 bg-surface-raised border border-surface-border px-2 py-1 rounded">${tech}</span>`
             ).join("");
-            
+
+            // ── Dynamic buttons from JSON ──
+            const buttonsContainer = document.getElementById("modal-buttons");
+            const buttons = project.buttons || [];
+
+            if (buttons.length === 0) {
+                buttonsContainer.innerHTML = `<span class="mono text-xs text-zinc-700 italic">no links available yet</span>`;
+            } else {
+                buttonsContainer.innerHTML = buttons.map(btn => {
+                    const styleClass = btn.style === "cta" ? "cta-btn" : "ghost-btn";
+                    const target = btn.external ? `target="_blank" rel="noopener noreferrer"` : "";
+                    return `<a href="${btn.url}" class="${styleClass}" ${target}>
+                        ${btn.icon ? `<iconify-icon icon="${btn.icon}" width="16"></iconify-icon>` : ""}
+                        ${btn.text}
+                    </a>`;
+                }).join("");
+
+                // Re-attach cursor hover for new buttons
+                if (!isTouchDevice && cursor) {
+                    buttonsContainer.querySelectorAll('.cta-btn, .ghost-btn').forEach(el => {
+                        el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                        el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+                    });
+                }
+            }
+
             modal.classList.add("open");
             document.body.style.overflow = "hidden";
         }
-        
-        // Close Modal
+
         function closeModal() {
             modal.classList.remove("open");
             document.body.style.overflow = "";
         }
-        
-        // Close on ESC or click outside
-        modal.addEventListener("click", (e) => {
-            if (e.target === modal) closeModal();
-        });
-        
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") closeModal();
-        });
-        
-        // Scroll Animation
+
+        modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+        document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+        // ════════════════════════════════════════════
+        // SCROLL ANIMATION
+        // ════════════════════════════════════════════
         function setupScrollAnimation() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) entry.target.classList.add("active");
-                });
+            const obs = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add("active"); });
             }, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
-            
-            document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+            document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
         }
-        
-        // Mobile Menu
+
+        // ════════════════════════════════════════════
+        // MOBILE MENU
+        // ════════════════════════════════════════════
         function toggleMobileMenu() {
             const menu = document.getElementById("mobile-menu");
-            const icon = document.querySelector("#mobile-menu + button iconify-icon");
+            const icon = document.getElementById("menu-icon");
             menu.classList.toggle("open");
             icon.setAttribute("icon", menu.classList.contains("open") ? "lucide:x" : "lucide:menu");
         }
-        
         function closeMobileMenu() {
             document.getElementById("mobile-menu").classList.remove("open");
-            document.querySelector("#mobile-menu + button iconify-icon").setAttribute("icon", "lucide:menu");
+            document.getElementById("menu-icon").setAttribute("icon", "lucide:menu");
         }
-        
-        // Initialize
+
+        // ════════════════════════════════════════════
+        // SCROLL PROGRESS + BACK TO TOP
+        // ════════════════════════════════════════════
+        const scrollProgress = document.getElementById('scroll-progress');
+        const backToTop = document.getElementById('back-to-top');
+
+        function onScroll() {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            scrollProgress.style.width = progress + '%';
+            if (scrollTop > 400) backToTop.classList.add('visible');
+            else backToTop.classList.remove('visible');
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        // ════════════════════════════════════════════
+        // CUSTOM CURSOR
+        // ════════════════════════════════════════════
+        const cursor = document.getElementById('cursor');
+        const isTouchDevice = window.matchMedia('(hover: none)').matches || 'ontouchstart' in window;
+        let targetX = window.innerWidth / 2, targetY = window.innerHeight / 2;
+
+        if (cursor && !isTouchDevice) {
+            let cursorX = targetX, cursorY = targetY;
+            document.addEventListener('mousemove', (e) => { targetX = e.clientX; targetY = e.clientY; });
+            function animateCursor() {
+                cursorX += (targetX - cursorX) * 0.18;
+                cursorY += (targetY - cursorY) * 0.18;
+                cursor.style.left = cursorX + 'px';
+                cursor.style.top = cursorY + 'px';
+                requestAnimationFrame(animateCursor);
+            }
+            animateCursor();
+            document.querySelectorAll('.cta-btn, .ghost-btn, .nav-link, .filter-btn').forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+            });
+        } else if (cursor) {
+            cursor.style.display = 'none';
+        }
+
+        // ════════════════════════════════════════════
+        // STAR FIELD
+        // ════════════════════════════════════════════
+        const starsContainer = document.getElementById('stars-container');
+        const isMobile = window.innerWidth < 768;
+        const starColors = ['rgba(255, 255, 255, 0.9)', 'rgba(230, 240, 255, 0.85)', 'rgba(255, 245, 230, 0.8)', 'rgba(200, 220, 255, 0.75)', 'rgba(255, 230, 210, 0.7)'];
+
+        const starCount = isMobile ? 60 : 140;
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const sizeRoll = Math.random();
+            let size = sizeRoll < 0.65 ? 1 : sizeRoll < 0.9 ? 2 : 3;
+            star.style.width = size + 'px'; star.style.height = size + 'px';
+            star.style.left = Math.random() * 100 + '%'; star.style.top = Math.random() * 100 + '%';
+            star.style.background = starColors[Math.floor(Math.random() * starColors.length)];
+            star.style.boxShadow = `0 0 ${size * 2}px ${star.style.background}`;
+            star.style.animationDuration = (2 + Math.random() * 5) + 's';
+            star.style.animationDelay = Math.random() * 5 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        const brightStarCount = isMobile ? 4 : 10;
+        for (let i = 0; i < brightStarCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'star-bright';
+            const size = 6 + Math.random() * 6;
+            star.style.width = size + 'px'; star.style.height = size + 'px';
+            star.style.left = Math.random() * 100 + '%'; star.style.top = Math.random() * 100 + '%';
+            star.style.color = starColors[Math.floor(Math.random() * 3)];
+            star.style.animationDuration = (3 + Math.random() * 4) + 's';
+            star.style.animationDelay = Math.random() * 5 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // ════════════════════════════════════════════
+        // SHOOTING STARS
+        // ════════════════════════════════════════════
+        const shootingStarsContainer = document.getElementById('shooting-stars');
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            star.style.left = (Math.random() * 60) + '%';
+            star.style.top = (Math.random() * 40) + '%';
+            const distance = 200 + Math.random() * 200;
+            const duration = 0.8 + Math.random() * 0.6;
+            let startTime = null;
+            function animateShoot(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                star.style.transform = `translate(${distance * easeProgress}px, ${distance * 0.7 * easeProgress}px)`;
+                star.style.opacity = progress < 0.15 ? progress / 0.15 : 1 - (progress - 0.15) / 0.85;
+                if (progress < 1) requestAnimationFrame(animateShoot); else star.remove();
+            }
+            shootingStarsContainer.appendChild(star);
+            requestAnimationFrame(animateShoot);
+        }
+        if (!isMobile) {
+            function scheduleShootingStar() {
+                setTimeout(() => { createShootingStar(); scheduleShootingStar(); }, 4000 + Math.random() * 8000);
+            }
+            setTimeout(scheduleShootingStar, 3000);
+        }
+
+        // ════════════════════════════════════════════
+        // CARD TILT (desktop only)
+        // ════════════════════════════════════════════
+        if (!isTouchDevice) {
+            document.addEventListener('mousemove', (e) => {
+                const card = e.target.closest('.project-card, .stat-card');
+                if (card) {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                    card.style.transform = `perspective(1000px) rotateX(${(y - rect.height / 2) / 25}deg) rotateY(${(rect.width / 2 - x) / 25}deg)`;
+                }
+            });
+            document.addEventListener('mouseleave', (e) => {
+                const card = e.target.closest('.project-card, .stat-card');
+                if (card) card.style.transform = '';
+            });
+        }
+
+        // ════════════════════════════════════════════
+        // TOAST SYSTEM
+        // ════════════════════════════════════════════
+        const toastContainer = document.getElementById('toast-container');
+        const discovered = new Set();
+
+        function showToast(message, icon = 'lucide:sparkles', variant = '') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${variant}`;
+            toast.innerHTML = `<iconify-icon icon="${icon}" width="18"></iconify-icon><span>${message}</span>`;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 50);
+            setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 500); }, 4000);
+        }
+
+        function discover(id, message, icon, variant) {
+            if (discovered.has(id)) return;
+            discovered.add(id);
+            showToast(message, icon, variant);
+        }
+
+        // ════════════════════════════════════════════
+        // CONSOLE EASTER EGG
+        // ════════════════════════════════════════════
+        console.log('%c\n  ██╗██╗   ██╗████████╗███████╗\n  ██║██║   ██║╚══██╔══╝██╔════╝\n  ██║██║   ██║   ██║   ███████╗\n  ██║██║   ██║   ██║   ╚════██║\n  ██║╚██████╔╝   ██║   ███████║\n  ╚═╝ ╚═════╝    ╚═╝   ╚══════╝\n\n', 'color: #22d3ee; font-weight: bold;');
+        console.log('%cProjects page. You found the console.', 'color: #67e8f9; font-size: 14px; font-weight: 600;');
+        console.log('%cTry these:\n  • Konami code: ↑↑↓↓←→←→BA\n  • Type "jyot" anywhere\n  • Double-click the moon\n  • Click the logo 5 times\n  • Press "G" for gravity\n  • Press "R" for a ripple\n\nBuilt with love by a 14 year old.', 'color: #a1a1aa; font-size: 12px; line-height: 1.6;');
+
+        // ════════════════════════════════════════════
+        // EASTER EGGS
+        // ════════════════════════════════════════════
+
+        // ── Konami → Matrix ──
+        let konamiBuffer = [];
+        const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+        document.addEventListener('keydown', (e) => {
+            konamiBuffer.push(e.key);
+            if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
+            if (konamiBuffer.join(',').toLowerCase() === konamiCode.join(',').toLowerCase()) { activateMatrix(); konamiBuffer = []; }
+        });
+
+        let matrixActive = false;
+        let matrixInterval = null;
+
+        function activateMatrix() {
+            if (matrixActive) return;
+            matrixActive = true;
+            document.body.classList.add('matrix-mode');
+            document.getElementById('matrix-overlay').classList.add('active');
+            document.getElementById('matrix-exit-hint').classList.add('show');
+            startMatrixRain();
+            discover('konami', 'Welcome to the matrix. Press ESC to exit.', 'lucide:gamepad-2', 'green');
+        }
+
+        function deactivateMatrix() {
+            if (!matrixActive) return;
+            matrixActive = false;
+            document.body.classList.remove('matrix-mode');
+            document.getElementById('matrix-overlay').classList.remove('active');
+            document.getElementById('matrix-exit-hint').classList.remove('show');
+            if (matrixInterval) { clearInterval(matrixInterval); matrixInterval = null; }
+        }
+
+        function startMatrixRain() {
+            const canvas = document.getElementById('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const chars = 'アカサタナハマヤラワガザダバパイキシチニヒミリギジヂビピウクスツヌフムユルグズヅブプエケセテネヘメレヱゲゼデベペオコソトノホモヨロヲゴゾドボポ0123456789ABCDEF';
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#22c55e';
+                ctx.font = fontSize + 'px JetBrains Mono';
+                for (let i = 0; i < drops.length; i++) {
+                    ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }
+            matrixInterval = setInterval(draw, 50);
+            window.addEventListener('resize', () => { if (matrixActive) { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } });
+        }
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && matrixActive) deactivateMatrix(); });
+
+        // ── Type "jyot" → Star burst ──
+        let typeBuffer = '';
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            typeBuffer += e.key.toLowerCase();
+            if (typeBuffer.length > 10) typeBuffer = typeBuffer.slice(-10);
+            if (typeBuffer.endsWith('jyot')) { starBurst(); typeBuffer = ''; }
+        });
+
+        function starBurst() {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            const colors = ['#22d3ee', '#67e8f9', '#ffffff', '#facc15', '#a855f7'];
+            const particleCount = 50;
+            for (let i = 0; i < particleCount; i++) {
+                const p = document.createElement('div');
+                p.className = 'burst-particle';
+                const size = 6 + Math.random() * 8;
+                p.style.width = size + 'px'; p.style.height = size + 'px';
+                p.style.left = cx + 'px'; p.style.top = cy + 'px';
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                p.style.background = color;
+                p.style.boxShadow = `0 0 ${size * 2}px ${color}`;
+                document.body.appendChild(p);
+                const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.3;
+                const velocity = 250 + Math.random() * 350;
+                p.animate([
+                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                    { transform: `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity}px) scale(0)`, opacity: 0 }
+                ], { duration: 1200 + Math.random() * 600, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+                setTimeout(() => p.remove(), 1800);
+            }
+            const flash = document.createElement('div');
+            flash.style.cssText = 'position:fixed;inset:0;z-index:9995;pointer-events:none;background:radial-gradient(circle at center,rgba(34,211,238,0.15),transparent 60%);opacity:0;';
+            document.body.appendChild(flash);
+            flash.animate([{ opacity: 0 }, { opacity: 1 }, { opacity: 0 }], { duration: 600, easing: 'ease-out' });
+            setTimeout(() => flash.remove(), 700);
+            discover('jyot', 'You said my name.', 'lucide:star', 'gold');
+        }
+
+        // ── Logo click 5x → Spin ──
+        let logoClicks = 0;
+        let logoTimer = null;
+        const logo = document.getElementById('logo');
+        logo.addEventListener('click', () => {
+            logoClicks++;
+            clearTimeout(logoTimer);
+            logoTimer = setTimeout(() => { logoClicks = 0; }, 2000);
+            if (logoClicks >= 5) {
+                logo.classList.add('spinning');
+                setTimeout(() => logo.classList.remove('spinning'), 800);
+                discover('logo', 'Wheeeeee.', 'lucide:refresh-cw', 'purple');
+                logoClicks = 0;
+            }
+        });
+
+        // ── Double-click moon ──
+        const moonGlow = document.getElementById('moon-glow');
+        moonGlow.addEventListener('dblclick', () => {
+            moonGlow.classList.add('boom');
+            discover('moon', 'You woke the moon up.', 'lucide:moon', '');
+            setTimeout(() => moonGlow.classList.remove('boom'), 4000);
+        });
+
+        // ── Press "G" → Gravity ──
+        let gravityActive = false;
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key.toLowerCase() === 'g' && !matrixActive && !gravityActive) {
+                gravityActive = true;
+                document.body.classList.add('gravity-mode');
+                discover('gravity', 'Gravity activated. Watch the stars fall.', 'lucide:arrow-down', 'purple');
+                setTimeout(() => {
+                    document.body.classList.remove('gravity-mode');
+                    document.querySelectorAll('.star, .star-bright').forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
+                    gravityActive = false;
+                }, 3000);
+            }
+        });
+
+        // ── Press "R" → Ripple ──
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key.toLowerCase() === 'r' && !matrixActive) {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const ripple = document.createElement('div');
+                        ripple.className = 'ripple';
+                        ripple.style.left = targetX + 'px';
+                        ripple.style.top = targetY + 'px';
+                        document.body.appendChild(ripple);
+                        ripple.animate([
+                            { width: '0px', height: '0px', marginLeft: '0px', marginTop: '0px', opacity: 1, borderWidth: '3px' },
+                            { width: '400px', height: '400px', marginLeft: '-200px', marginTop: '-200px', opacity: 0, borderWidth: '1px' }
+                        ], { duration: 1000, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+                        setTimeout(() => ripple.remove(), 1100);
+                    }, i * 150);
+                }
+            }
+        });
+
+        // ── Idle ──
+        let idleTimer = null;
+        function resetIdle() {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                if (!matrixActive) showToast('Still there? Try the konami code.', 'lucide:eye', 'purple');
+            }, 45000);
+        }
+        document.addEventListener('mousemove', resetIdle);
+        document.addEventListener('keydown', resetIdle);
+        document.addEventListener('scroll', resetIdle, { passive: true });
+        document.addEventListener('click', resetIdle);
+        resetIdle();
+
+        // ── Close mobile menu on outside click ──
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('mobile-menu');
+            const btn = document.querySelector('.nav-mobile-btn');
+            if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) closeMobileMenu();
+        });
+
+        // ════════════════════════════════════════════
+        // INIT — async, loads JSON first
+        // ════════════════════════════════════════════
+        async function init() {
+            const success = await loadProjects();
+            if (success) {
+                renderStats();
+                renderProjects(projects);
+                setupFilters();
+                setupSearch();
+            }
+            setupScrollAnimation();
+        }
+
         init();
+        onScroll();
     </script>
 </body>
 </html>
