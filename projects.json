@@ -1,0 +1,179 @@
+{
+  "stats": {
+    "technologies": "12+"
+  },
+  "projects": [
+    {
+      "id": 1,
+      "title": "This Website",
+      "description": "Custom hand-built portfolio website featuring smooth animations, responsive design, and a modern dark aesthetic. Built from scratch with vanilla HTML, CSS, and JavaScript.",
+      "status": "active",
+      "image": "image.png",
+      "noImage": false,
+      "technologies": ["HTML", "CSS", "JavaScript", "Tailwind"],
+      "months": 2,
+      "stars": 0,
+      "buttons": [
+        {
+          "text": "View Source",
+          "icon": "lucide:github",
+          "url": "https://github.com/jyotpatel/jyot.dev",
+          "style": "cta",
+          "external": true
+        },
+        {
+          "text": "Live Demo",
+          "icon": "lucide:external-link",
+          "url": "https://jyot.dev",
+          "style": "ghost",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Smart Home IoT Controller",
+      "description": "A centralized IoT hub for controlling home automation devices. Features MQTT integration, real-time dashboards, and voice control compatibility.",
+      "status": "building",
+      "image": "",
+      "noImage": true,
+      "technologies": ["Python", "ESP32", "MQTT", "React"],
+      "months": 3,
+      "stars": 0,
+      "buttons": [
+        {
+          "text": "View Source",
+          "icon": "lucide:github",
+          "url": "https://github.com/jyotpatel/iot-controller",
+          "style": "cta",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Portfolio v2 - React Version",
+      "description": "Next iteration of the portfolio using React with TypeScript. Implements component-based architecture and improved performance.",
+      "status": "planned",
+      "image": "",
+      "noImage": true,
+      "technologies": ["React", "TypeScript", "Vite", "Framer Motion"],
+      "months": 0,
+      "stars": 0,
+      "buttons": []
+    },
+    {
+      "id": 4,
+      "title": "PCB Design Tool Helper",
+      "description": "Browser-based PCB design assistant that helps validate footprints, check clearance rules, and generate BOM exports.",
+      "status": "active",
+      "image": "",
+      "noImage": true,
+      "technologies": ["JavaScript", "KiCad API", "Node.js"],
+      "months": 4,
+      "stars": 0,
+      "buttons": [
+        {
+          "text": "View Source",
+          "icon": "lucide:github",
+          "url": "https://github.com/jyotpatel/pcb-helper",
+          "style": "cta",
+          "external": true
+        },
+        {
+          "text": "Documentation",
+          "icon": "lucide:book-open",
+          "url": "https://github.com/jyotpatel/pcb-helper/wiki",
+          "style": "ghost",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Weather Station Dashboard",
+      "description": "Real-time weather monitoring system with sensor data visualization. Collects temperature, humidity, pressure, and air quality metrics.",
+      "status": "building",
+      "image": "",
+      "noImage": true,
+      "technologies": ["Python", "Raspberry Pi", "Flask", "Chart.js"],
+      "months": 2,
+      "stars": 0,
+      "buttons": [
+        {
+          "text": "View Source",
+          "icon": "lucide:github",
+          "url": "https://github.com/jyotpatel/weather-station",
+          "style": "cta",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Task Management CLI",
+      "description": "Command-line task manager with markdown support, priority sorting, and calendar integration. Lightweight alternative to complex project management tools.",
+      "status": "active",
+      "image": "",
+      "noImage": true,
+      "technologies": ["Python", "Click", "SQLite"],
+      "months": 5,
+      "stars": 0,
+      "buttons": [
+        {
+          "text": "View Source",
+          "icon": "lucide:github",
+          "url": "https://github.com/jyotpatel/task-cli",
+          "style": "cta",
+          "external": true
+        },
+        {
+          "text": "Install",
+          "icon": "lucide:download",
+          "url": "https://github.com/jyotpatel/task-cli/releases",
+          "style": "ghost",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "3D Printer Firmware Mod",
+      "description": "Custom Marlin firmware modifications for improved print quality, faster speeds, and enhanced safety features on Ender 3 printers.",
+      "status": "planned",
+      "image": "",
+      "noImage": true,
+      "technologies": ["C++", "Marlin", "STM32"],
+      "months": 0,
+      "stars": 0,
+      "buttons": []
+    },
+    {
+      "id": 8,
+      "title": "Discord Bot - Developer Utilities",
+      "description": "Discord bot providing developer-focused utilities: code snippet formatting, GitHub integration, npm package lookup, and team coordination features.",
+      "status": "building",
+      "image": "",
+      "noImage": true,
+      "technologies": ["Node.js", "Discord.js", "MongoDB"],
+      "months": 1,
+      "stars": 0,
+      "buttons": [
+        {
+          "text": "View Source",
+          "icon": "lucide:github",
+          "url": "https://github.com/jyotpatel/dev-bot",
+          "style": "cta",
+          "external": true
+        },
+        {
+          "text": "Invite Bot",
+          "icon": "lucide:bot",
+          "url": "https://discord.com/oauth2/authorize?client_id=xxx",
+          "style": "ghost",
+          "external": true
+        }
+      ]
+    }
+  ]
+}
