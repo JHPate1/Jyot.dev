@@ -43,7 +43,6 @@ interface Ctx {
   staging: Staging;
   roster: AgentProfile[];
   task: string;
-  /** User's single Seeker API key — injected into every agent call. */
   apiKey: string;
   callbacks: SwarmCallbacks;
   signal: AbortSignal;

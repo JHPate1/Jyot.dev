@@ -33,7 +33,7 @@ export async function runAgent(opts: {
   const messages: ChatMessage[] = [{ role: "system", content: system }, ...opts.history];
   const callProfile: CallProfile = profile ? toProfile(profile, settings.apiKey) : {
     apiKey: settings.apiKey,
-    model: "seeker-pro-1.2",
+    model: "nvidia/nemotron-3-super-120b-a12b",
     temperature: 1,
     topP: 0.95,
     maxTokens: 16384,

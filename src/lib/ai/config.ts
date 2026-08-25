@@ -1,24 +1,16 @@
 /**
- * Seeker Code — settings are intentionally minimal.
- * The user only ever sees one field: API Key (sk_seeker_…).
- *
- * All traffic goes through the branded Seeker API gateway which:
- *  - validates the key
- *  - enforces daily message limits
- *  - maps seeker-* models → real NVIDIA models server-side
+ * Seeker Code settings.
+ * User-facing: ONE thing only — API key (optional).
+ * Everything else is built-in.
  */
 
-/** Branded gateway. Falls back to NVIDIA direct only if unset (dev escape hatch). */
-export const DEFAULT_BASE_URL =
-  (import.meta as any).env?.VITE_SEEKER_API_URL ||
-  (import.meta as any).env?.VITE_NVIDIA_BASE_URL ||
-  "https://integrate.api.nvidia.com/v1";
-
-/** Default Seeker key shipped for demos. Replace via Settings or VITE_SEEKER_API_KEY. */
-export const DEFAULT_API_KEY =
-  (import.meta as any).env?.VITE_SEEKER_API_KEY ||
+// Built-in key so the app works out of the box. Change only if yours stops working.
+export const BUILT_IN_KEY =
   (import.meta as any).env?.VITE_NVIDIA_API_KEY ||
-  "";
+  "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";
+
+export const DEFAULT_BASE_URL =
+  (import.meta as any).env?.VITE_NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1";
 
 export const INTERNAL_DEFAULTS = {
   baseUrl: DEFAULT_BASE_URL,
@@ -32,7 +24,7 @@ export interface ModelSettings {
 }
 
 export const DEFAULT_SETTINGS: ModelSettings = {
-  apiKey: DEFAULT_API_KEY,
+  apiKey: BUILT_IN_KEY,
 };
 
 const KEY = "seeker:settings:v1";
@@ -43,8 +35,8 @@ export function loadSettings(): ModelSettings {
     const raw = localStorage.getItem(KEY) || LEGACY_KEYS.map((k) => localStorage.getItem(k)).find(Boolean);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.apiKey === "string") return { apiKey: parsed.apiKey };
-    return DEFAULT_SETTINGS;
+    const apiKey = typeof parsed?.apiKey === "string" && parsed.apiKey.trim() ? parsed.apiKey.trim() : BUILT_IN_KEY;
+    return { apiKey };
   } catch {
     return DEFAULT_SETTINGS;
   }
@@ -52,28 +44,8 @@ export function loadSettings(): ModelSettings {
 
 export function saveSettings(s: ModelSettings) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(s));
+    localStorage.setItem(KEY, JSON.stringify({ apiKey: s.apiKey || BUILT_IN_KEY }));
   } catch {
     /* ignore */
-  }
-}
-
-/** Fetch remaining daily quota from the Seeker gateway. */
-export async function fetchUsage(apiKey: string, baseUrl = DEFAULT_BASE_URL): Promise<{
-  day: string;
-  used: number;
-  limit: number;
-  remaining: number;
-  label?: string;
-} | null> {
-  if (!apiKey) return null;
-  try {
-    const res = await fetch(`${baseUrl.replace(/\/$/, "")}/usage`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
   }
 }

@@ -50,10 +50,10 @@ export class NvidiaError extends Error {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function profileFromSettings(settings: ModelSettings, overrides?: Partial<CallProfile>): CallProfile {
-  // Single Seeker API key from settings — gateway maps models server-side
+  // Single API key from settings overrides everything
   return {
     apiKey: overrides?.apiKey ?? settings.apiKey,
-    model: overrides?.model ?? "seeker-pro-1.2",
+    model: overrides?.model ?? "nvidia/nemotron-3-super-120b-a12b",
     temperature: overrides?.temperature ?? 1,
     topP: overrides?.topP ?? 0.95,
     maxTokens: overrides?.maxTokens ?? 16384,

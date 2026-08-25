@@ -1,12 +1,9 @@
 import type { CallProfile } from "./nvidiaClient";
-import { INTERNAL_DEFAULTS } from "./config";
+import { BUILT_IN_KEY, INTERNAL_DEFAULTS } from "./config";
 
 /**
- * Seeker Code — Agent Roster
- *
- * Public model ids are Seeker-branded. The Seeker API gateway maps them to
- * real NVIDIA models server-side. The browser never sees nvapi keys or
- * nvidia/deepseek/llama model strings.
+ * Built-in Seeker team. Users do NOT configure models or keys per agent.
+ * One shared API key from Settings powers all three.
  */
 
 export interface AgentProfile extends CallProfile {
@@ -21,79 +18,51 @@ export interface AgentProfile extends CallProfile {
   enabled: boolean;
 }
 
-// Claude-style identity prompts
 const SEEKER_PRO_12 = `
-You are Seeker Pro 1.2, a highly capable coding assistant built by Seeker Code.
+You are Seeker Pro 1.2, a coding assistant built by Seeker Code.
 
 Identity:
-- Your name is Seeker Pro 1.2. You must identify as Seeker Pro 1.2.
-- You were built by Seeker Code to help people understand and improve their code.
-- You are the lead architect of a small team. You plan work, decompose complex tasks, and review results.
-- You must never claim to be Nemotron, Llama, DeepSeek, Claude, GPT, or any other model. You are Seeker Pro 1.2.
+- Your name is Seeker Pro 1.2. Always identify as Seeker Pro 1.2.
+- Never claim to be Nemotron, Llama, DeepSeek, Claude, GPT, or any other model.
+- You plan work, split tasks for the team, and review results.
 
 Behavior:
-- Be concise, warm, and helpful. Explain like you're helping a smart colleague, not a developer manual.
-- Think step-by-step, but keep your final answer clear and actionable.
-- When you review code, point to specific files and lines.
-- You do not edit files yourself in planning mode — you produce a structured plan for your teammates.
-- You care deeply about user control: all edits are staged for review before saving.
-
-Communication:
-- Use plain language. Avoid jargon unless the user uses it.
-- If the task is ambiguous, make a sensible assumption and state it in one line.
+- Be clear, warm, and brief. Use plain English.
+- Point to files and line numbers when you explain code.
+- All edits are staged for the user to review before saving.
 `.trim();
 
 const SEEKER_PERPLEX = `
-You are Seeker Perplex, a fast and thorough coding assistant built by Seeker Code.
+You are Seeker Perplex, a coding assistant built by Seeker Code.
 
 Identity:
-- Your name is Seeker Perplex. You are part of the Seeker Code family.
-- You specialize in deep implementation work — building features, fixing bugs, wiring up logic.
-- You must never claim to be DeepSeek, Nemotron, Llama, Claude, or any other model. You are Seeker Perplex.
+- Your name is Seeker Perplex. Never claim to be DeepSeek or any other model.
+- You implement features and fix bugs carefully.
 
 Behavior:
-- You are fast, precise, and careful. You read the relevant files first, then make minimal, correct changes.
-- You prefer small, focused edits over large rewrites.
-- You always consider edge cases: null checks, error handling, and user impact.
-- When you finish a task, summarize what you changed in 1-2 lines.
-
-Communication:
-- Be friendly and direct. No filler, no apologies.
-- Keep code complete — no placeholders like "// rest of code".
+- Read relevant files first, then make small correct changes.
+- No placeholder code. Summarize what you changed in 1–2 lines.
 `.trim();
 
 const SEEKER_FLASH = `
-You are Seeker Code Flash, a lightning-fast coding assistant built by Seeker Code.
+You are Seeker Code Flash, a coding assistant built by Seeker Code.
 
 Identity:
-- Your name is Seeker Code Flash. You are part of the Seeker Code family.
-- You specialize in quick cleanups, refactors, small fixes, and polishing existing code.
-- You must never claim to be Llama, Nemotron, DeepSeek, Claude, or any other model. You are Seeker Code Flash.
+- Your name is Seeker Code Flash. Never claim to be Llama or any other model.
+- You do quick cleanups, small fixes, and polish.
 
 Behavior:
-- You are extremely fast and lightweight. You handle small tasks in 1-2 steps.
-- You clean up code for readability without changing behavior.
-- You are careful with user files — you never delete without being asked.
-- You summarize your work briefly.
-
-Communication:
-- Be short, upbeat, and helpful.
-- Use simple language that anyone can understand.
+- Stay fast. Prefer tiny edits. Be short and clear.
 `.trim();
 
-/**
- * model = public Seeker id (gateway rewrites to NVIDIA server-side)
- * apiKey is intentionally empty here — the user's single Seeker key from
- * Settings is injected at call time via toProfile(agent, settings.apiKey).
- */
 export const AGENTS: AgentProfile[] = [
   {
     id: "seeker-pro",
     label: "Seeker Pro 1.2",
     short: "SP",
-    model: "seeker-pro-1.2",
-    apiKey: "",
-    role: "Lead architect — plans tasks, splits work, and reviews team results.",
+    model: "nvidia/nemotron-3-super-120b-a12b",
+    apiKey: BUILT_IN_KEY,
+    role: "Plans the work and reviews the team’s results",
     systemPrompt: SEEKER_PRO_12,
     temperature: 1,
     topP: 0.95,
@@ -109,9 +78,9 @@ export const AGENTS: AgentProfile[] = [
     id: "seeker-perplex",
     label: "Seeker Perplex",
     short: "SX",
-    model: "seeker-perplex",
-    apiKey: "",
-    role: "Deep builder — implements features and fixes bugs with careful reasoning.",
+    model: "deepseek-ai/deepseek-v4-flash-0731",
+    apiKey: BUILT_IN_KEY,
+    role: "Builds features and fixes bugs",
     systemPrompt: SEEKER_PERPLEX,
     temperature: 1,
     topP: 0.95,
@@ -126,9 +95,9 @@ export const AGENTS: AgentProfile[] = [
     id: "seeker-flash",
     label: "Seeker Code Flash",
     short: "SF",
-    model: "seeker-code-flash",
-    apiKey: "",
-    role: "Quick editor — fast cleanups, small fixes, and polish.",
+    model: "meta/llama-3.3-70b-instruct",
+    apiKey: BUILT_IN_KEY,
+    role: "Fast cleanups and small fixes",
     systemPrompt: SEEKER_FLASH,
     temperature: 0.2,
     topP: 0.7,
@@ -144,10 +113,10 @@ export const AGENTS: AgentProfile[] = [
 export const AGENT_BY_ID = new Map(AGENTS.map((a) => [a.id, a]));
 export const ARCHITECT = AGENTS.find((a) => a.isArchitect)!;
 
-/** Build a CallProfile, always preferring the user's Seeker key from Settings. */
+/** Always use the user's single Settings key for every agent. */
 export function toProfile(a: AgentProfile, overrideKey?: string): CallProfile {
   return {
-    apiKey: overrideKey || a.apiKey,
+    apiKey: overrideKey || a.apiKey || BUILT_IN_KEY,
     model: a.model,
     temperature: a.temperature,
     topP: a.topP,
@@ -158,27 +127,33 @@ export function toProfile(a: AgentProfile, overrideKey?: string): CallProfile {
 }
 
 const KEY = "seeker:agents:v1";
-const LEGACY = ["kode:agents:v1"];
 
 export function loadAgents(): AgentProfile[] {
+  // Always return the current built-in roster. No user model config.
   try {
-    const raw = localStorage.getItem(KEY) || LEGACY.map((k) => localStorage.getItem(k)).find(Boolean);
-    if (!raw) return AGENTS;
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return AGENTS.map((a) => ({ ...a }));
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || !parsed.length) return AGENTS;
+    if (!Array.isArray(parsed)) return AGENTS.map((a) => ({ ...a }));
     return AGENTS.map((def) => {
-      const saved = parsed.find((p: any) => p.id === def.id || p.label === def.label);
-      if (!saved) return def;
-      return { ...def, enabled: saved.enabled ?? def.enabled, maxSteps: saved.maxSteps ?? def.maxSteps };
+      const saved = parsed.find((p: any) => p.id === def.id);
+      return {
+        ...def,
+        enabled: saved?.enabled ?? def.enabled,
+        maxSteps: typeof saved?.maxSteps === "number" ? saved.maxSteps : def.maxSteps,
+      };
     });
   } catch {
-    return AGENTS;
+    return AGENTS.map((a) => ({ ...a }));
   }
 }
 
 export function saveAgents(list: AgentProfile[]) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(list));
+    localStorage.setItem(
+      KEY,
+      JSON.stringify(list.map((a) => ({ id: a.id, enabled: a.enabled, maxSteps: a.maxSteps }))),
+    );
   } catch {
     /* ignore */
   }

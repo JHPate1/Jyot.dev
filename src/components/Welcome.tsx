@@ -73,6 +73,13 @@ export default function Welcome() {
           <Feature icon="⚡" title="Seeker team" desc="Seeker Pro 1.2 plans, Seeker Perplex and Seeker Code Flash build together." />
         </div>
 
+        <div className="mt-5 rounded-2xl border border-white/8 bg-[#121418] px-5 py-4 text-[13px] leading-relaxed text-slate-300">
+          <div className="font-semibold text-white">Do I need to set up an API key?</div>
+          <div className="mt-1 text-slate-400">
+            No. Seeker Code already includes one. Just open a folder and start. Only open Settings if the built-in key stops working.
+          </div>
+        </div>
+
         <div className="mt-6 flex items-center justify-between text-[12.5px]">
           <button onClick={() => setPanel("blueprint")} className="flex items-center gap-1.5 text-slate-400 hover:text-white">
             <Sparkles size={14} /> How Seeker Code works — user guide
