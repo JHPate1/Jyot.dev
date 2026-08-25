@@ -1,0 +1,15 @@
+{
+  "name": "seeker-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Seeker Code branded API gateway — validates keys, enforces daily limits, masks NVIDIA endpoints",
+  "scripts": {
+    "zip": "zip -r ../seeker-api.zip index.mjs package.json node_modules -x '*.map'",
+    "install:prod": "npm install --omit=dev"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.758.0",
+    "@aws-sdk/lib-dynamodb": "^3.758.0"
+  }
+}

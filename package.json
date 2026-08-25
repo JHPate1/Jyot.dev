@@ -1,0 +1,46 @@
+{
+  "name": "react-vite-tailwind",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.18.4",
+    "@codemirror/commands": "^6.8.0",
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.9",
+    "@codemirror/lang-javascript": "^6.2.2",
+    "@codemirror/lang-json": "^6.0.1",
+    "@codemirror/lang-markdown": "^6.3.2",
+    "@codemirror/lang-python": "^6.1.7",
+    "@codemirror/lang-rust": "^6.0.1",
+    "@codemirror/language": "^6.10.8",
+    "@codemirror/lint": "^6.8.4",
+    "@codemirror/search": "^6.5.8",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.36.2",
+    "@lezer/highlight": "^1.2.1",
+    "clsx": "2.1.1",
+    "idb-keyval": "^6.2.1",
+    "lucide-react": "^0.469.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "tailwind-merge": "3.4.0",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.1.17",
+    "@types/node": "22.19.17",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "5.1.1",
+    "tailwindcss": "4.1.17",
+    "typescript": "5.9.3",
+    "vite": "7.3.2",
+    "vite-plugin-singlefile": "2.3.0"
+  }
+}

@@ -1,0 +1,28 @@
+# AWS Amplify config for Seeker Code
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci --prefer-offline --no-audit --fund=false
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: dist
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*
+customHeaders:
+  - pattern: "**/*"
+    headers:
+      - key: Cross-Origin-Opener-Policy
+        value: same-origin
+      - key: X-Content-Type-Options
+        value: nosniff
+  - pattern: "/index.html"
+    headers:
+      - key: Cache-Control
+        value: "public, max-age=0, must-revalidate"
