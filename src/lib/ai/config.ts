@@ -10,7 +10,7 @@ export const BUILT_IN_KEY =
   "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";
 
 export const DEFAULT_BASE_URL =
-  (import.meta as any).env?.VITE_NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1";
+  (import.meta as any).env?.VITE_NVIDIA_BASE_URL || "/api/nim/";
 
 export const INTERNAL_DEFAULTS = {
   baseUrl: DEFAULT_BASE_URL,
