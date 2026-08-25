@@ -34,8 +34,11 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
 }
 
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
-  const { settings, setSettings, index, toast } = useIde();
+  const { settings, setSettings, index, toast, agents, setAgents } = useIde();
   const [showKey, setShowKey] = useState(false);
+
+  const updateAgent = (id: string, patch: Partial<(typeof agents)[number]>) =>
+    setAgents(agents.map((a) => (a.id === id ? { ...a, ...patch } : a)));
   const [testing, setTesting] = useState<null | "ok" | "fail" | "run">(null);
 
   const test = async () => {
@@ -122,6 +125,48 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
               {settings.autoApply && <span className="text-[11.5px] text-amber-400">Immediate saving enabled</span>}
             </div>
           </Row>
+
+          <div className="mb-1 mt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Team (Multi-Agent Swarm)</div>
+          <div className="space-y-2 py-1">
+            {agents.map((a) => (
+              <div key={a.id} className="rounded-lg border border-white/8 bg-ink-900/50 p-2.5">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold text-white" style={{ background: a.color }}>
+                    {a.short}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 text-[12.5px] font-medium text-slate-100">
+                      {a.label}
+                      {a.isArchitect && <span className="rounded bg-nv-500/20 px-1.5 py-0.5 text-[9.5px] font-medium text-nv-300">ARCHITECT</span>}
+                    </div>
+                    <div className="truncate font-mono text-[10.5px] text-slate-500">{a.model}</div>
+                  </div>
+                  <Toggle
+                    on={a.enabled || !!a.isArchitect}
+                    onChange={(v) => updateAgent(a.id, { enabled: v })}
+                  />
+                </div>
+                <div className="mt-1.5 text-[11px] text-slate-400">{a.role}</div>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-[10.5px] text-slate-500">Max steps</span>
+                  <div className="flex items-center gap-1">
+                    {[3, 4, 5, 6, 8, 10].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => updateAgent(a.id, { maxSteps: n })}
+                        className={cn(
+                          "rounded px-1.5 py-0.5 font-mono text-[10.5px] transition",
+                          a.maxSteps === n ? "bg-nv-500/20 text-nv-300" : "text-slate-500 hover:bg-white/5 hover:text-slate-300",
+                        )}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
 
           <div className="mb-1 mt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Project Search Status</div>
           <Row label="Files Indexed" hint="How many files are searchable in your open project.">

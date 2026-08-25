@@ -23,7 +23,7 @@ export interface AgentCallbacks {
   onFinish: (reason: "finish" | "budget" | "aborted" | "no-tools" | "error", detail?: string) => void;
 }
 
-const MAX_TOOL_OUTPUT = 6000;
+const MAX_TOOL_OUTPUT = 24000;
 
 export async function runAgent(opts: {
   settings: ModelSettings;

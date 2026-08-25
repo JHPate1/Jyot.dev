@@ -222,11 +222,6 @@ export class Staging {
   }
 }
 
-/** Combined unified diff of everything currently staged (for the reviewer). */
-export function unifiedPreview(staging: Staging): string {
-  return staging.list.map((c) => unifiedPatch(c.path, c.before, c.after)).join("\n\n");
-}
-
 export interface ToolContext {
   fs: VFS;
   index: WorkspaceIndex;
@@ -240,15 +235,11 @@ async function readEffective(ctx: ToolContext, path: string): Promise<string> {
   return ctx.fs.readFile(path);
 }
 
-function numbered(text: string, offset = 0): string {
-  const lines = text.split("\n");
+function numbered(text: string, offset = 0, max = 3000): string {
+  const lines = text.split("\n").slice(0, max);
   const w = String(offset + lines.length).length;
   return lines.map((l, i) => `${String(offset + i + 1).padStart(w, " ")}| ${l}`).join("\n");
 }
-
-// Hard ceiling per read so a huge file can't blow the context window, but big
-// enough that normal source files are returned whole (previously capped at 800).
-const MAX_READ_LINES = 4000;
 
 export async function executeTool(ctx: ToolContext, call: ToolCall): Promise<ToolResult> {
   const base = { id: call.id, tool: call.tool };
@@ -258,18 +249,12 @@ export async function executeTool(ctx: ToolContext, call: ToolCall): Promise<Too
       case "read_file": {
         if (!path) throw new Error("path required");
         const text = await readEffective(ctx, path);
-        const allLines = text.split("\n");
-        const total = allLines.length;
         const start = Math.max(1, Number(call.args.start) || 1);
-        const requestedEnd = Number(call.args.end) || total;
-        const end = Math.min(requestedEnd, start - 1 + MAX_READ_LINES, total);
-        const slice = allLines.slice(start - 1, end).join("\n");
-        const body = numbered(slice, start - 1) || "(empty file)";
-        const note =
-          end < total
-            ? `\n\n[showing lines ${start}-${end} of ${total}; call read_file again with start=${end + 1} to continue]`
-            : "";
-        return { ...base, ok: true, mutating: false, path, output: body + note };
+        const total = text.split("\n").length;
+        const end = Number(call.args.end) || Math.min(start + 2999, total);
+        const slice = text.split("\n").slice(start - 1, end).join("\n");
+        const truncatedNote = end < total ? `\n… [showing lines ${start}-${end} of ${total} — call read_file with start/end to read the rest]` : "";
+        return { ...base, ok: true, mutating: false, path, output: (numbered(slice, start - 1) || "(empty file)") + truncatedNote };
       }
       case "list_dir": {
         const tree = await ctx.fs.listTree();
