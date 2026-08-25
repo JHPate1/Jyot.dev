@@ -3,11 +3,13 @@ import type { WorkspaceIndex } from "../index/workspaceIndex";
 export const TOOL_SPEC = `
 ## Tools
 
-To perform actions on files, emit a fenced code block tagged \`tool\` containing a single JSON object:
+To perform actions on files, emit a fenced code block containing a single JSON object with a "tool" key and an "args" object. Use the info string \`tool\`:
 
 \`\`\`tool
 {"tool": "read_file", "args": {"path": "src/cart.ts"}}
 \`\`\`
+
+Emit ONLY the JSON inside the block — no comments, no trailing text on the same line. Put any explanation OUTSIDE the code block. After emitting tool blocks, stop and wait for the results before continuing.
 
 Available tools:
 - read_file(path, start?, end?): Read file contents with line numbers.

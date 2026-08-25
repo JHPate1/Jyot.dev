@@ -54,29 +54,118 @@ export const OPENAI_TOOL_SCHEMA = [
   { name: "finish", description: "End the run with a summary.", parameters: { type: "object", properties: { summary: { type: "string" } }, required: ["summary"] } },
 ] as const;
 
-const FENCE = /```(?:tool|tool_call|json:tool)\s*\n([\s\S]*?)```/g;
+// Matches any fenced code block regardless of the info-string the model used
+// (```tool, ```json, ```json:tool, or a bare ```). We inspect the contents to
+// decide whether it is actually a tool call, so we are tolerant of every model.
+const ANY_FENCE = /```[^\n`]*\n([\s\S]*?)```/g;
+const KNOWN_TOOLS = new Set<string>([
+  "read_file", "list_dir", "search_workspace", "create_file", "write_file",
+  "edit_file", "delete_file", "diff_preview", "run_check", "finish",
+]);
+
+/** Pull every {...} / [...] JSON candidate out of a chunk of text. */
+function extractJsonCandidates(text: string): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < text.length; i++) {
+    const open = text[i];
+    if (open !== "{" && open !== "[") continue;
+    const close = open === "{" ? "}" : "]";
+    let depth = 0;
+    let inStr = false;
+    let esc = false;
+    for (let j = i; j < text.length; j++) {
+      const ch = text[j];
+      if (inStr) {
+        if (esc) esc = false;
+        else if (ch === "\\") esc = true;
+        else if (ch === '"') inStr = false;
+        continue;
+      }
+      if (ch === '"') inStr = true;
+      else if (ch === open) depth++;
+      else if (ch === close) {
+        depth--;
+        if (depth === 0) {
+          out.push(text.slice(i, j + 1));
+          i = j;
+          break;
+        }
+      }
+    }
+  }
+  return out;
+}
+
+function coerceCalls(rawJson: string, push: (tool: string, args: any) => void): boolean {
+  let obj: any;
+  try {
+    obj = JSON.parse(rawJson);
+  } catch {
+    return false;
+  }
+  const list = Array.isArray(obj) ? obj : [obj];
+  let found = false;
+  for (const o of list) {
+    if (!o || typeof o !== "object") continue;
+    const name = o.tool ?? o.tool_name ?? o.name ?? o.function;
+    if (typeof name === "string" && KNOWN_TOOLS.has(name)) {
+      let args = o.args ?? o.arguments ?? o.parameters ?? o.input ?? {};
+      if (typeof args === "string") {
+        try {
+          args = JSON.parse(args);
+        } catch {
+          /* leave as-is */
+        }
+      }
+      push(name, args ?? {});
+      found = true;
+    }
+  }
+  return found;
+}
 
 export function parseToolCalls(text: string): { calls: ToolCall[]; prose: string } {
   const calls: ToolCall[] = [];
   let i = 0;
-  FENCE.lastIndex = 0;
+  const push = (tool: string, args: any) => calls.push({ id: `t${Date.now()}_${i++}`, tool: tool as ToolName, args });
+
+  const consumedRanges: [number, number][] = [];
+
+  // 1) Prefer fenced blocks (any language tag). A fence that contains a tool
+  //    call is removed from the visible prose; a fence that does not is kept.
+  ANY_FENCE.lastIndex = 0;
   let m: RegExpExecArray | null;
-  while ((m = FENCE.exec(text))) {
-    const raw = m[1].trim();
-    try {
-      const obj = JSON.parse(raw);
-      const list = Array.isArray(obj) ? obj : [obj];
-      for (const o of list) {
-        if (o && typeof o.tool === "string") {
-          calls.push({ id: `t${Date.now()}_${i++}`, tool: o.tool as ToolName, args: o.args ?? o.arguments ?? {} });
-        }
+  while ((m = ANY_FENCE.exec(text))) {
+    const before = calls.length;
+    // a fenced block may itself hold several JSON objects
+    const candidates = extractJsonCandidates(m[1]);
+    let matched = false;
+    for (const c of candidates) matched = coerceCalls(c, push) || matched;
+    if (!matched && m[1].trim().startsWith("{")) matched = coerceCalls(m[1].trim(), push);
+    if (matched && calls.length > before) consumedRanges.push([m.index, m.index + m[0].length]);
+  }
+
+  // 2) Fallback: some models emit the JSON with no fence at all. Scan the
+  //    non-fenced remainder for bare tool objects.
+  if (!calls.length) {
+    for (const c of extractJsonCandidates(text)) {
+      const before = calls.length;
+      if (coerceCalls(c, push) && calls.length > before) {
+        const idx = text.indexOf(c);
+        if (idx >= 0) consumedRanges.push([idx, idx + c.length]);
       }
-    } catch {
-      calls.push({ id: `t${Date.now()}_${i++}`, tool: "finish", args: { summary: "Malformed tool JSON — aborting step.", _error: raw.slice(0, 200) } });
     }
   }
-  const prose = text.replace(FENCE, "").trim();
-  return { calls, prose };
+
+  // Build prose with every consumed tool-call region stripped out.
+  let prose = text;
+  consumedRanges
+    .sort((a, b) => b[0] - a[0])
+    .forEach(([s, e]) => {
+      prose = prose.slice(0, s) + prose.slice(e);
+    });
+
+  return { calls, prose: prose.trim() };
 }
 
 /** Staged mutation set — the "git index" of the agent. */

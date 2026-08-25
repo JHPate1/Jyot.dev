@@ -7,7 +7,7 @@ import { useIde } from "@/store/ide";
 import { Markdown } from "./Markdown";
 import { cn } from "@/utils/cn";
 import { flattenFiles } from "@/lib/fs/types";
-import type { ToolResult } from "@/lib/ai/tools";
+import { parseToolCalls, type ToolResult } from "@/lib/ai/tools";
 
 const TOOL_ICON: Record<string, any> = {
   read_file: FileCode2,
@@ -317,5 +317,7 @@ export default function ChatPanel() {
 }
 
 function stripToolFences(s: string) {
-  return s.replace(/```(?:tool|tool_call|json:tool)\s*\n[\s\S]*?```/g, "").trim();
+  // Reuse the real parser so whatever fence style the model used, the tool JSON
+  // is removed from the visible message and only the prose remains.
+  return parseToolCalls(s).prose;
 }
