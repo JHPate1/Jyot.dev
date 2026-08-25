@@ -214,17 +214,24 @@ export default function ChatPanel() {
                   <Wand2 size={11} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <Reasoning text={t.reasoning ?? ""} live={!!t.streaming && !t.content} />
+                  <Reasoning text={t.reasoning ?? ""} live={!!t.streaming && !stripToolFences(t.content)} />
                   {!!t.tools?.length && (
                     <div className="mb-2 space-y-1.5">
                       {t.tools.map((x, i) => <ToolCard key={i} t={x} />)}
                     </div>
                   )}
-                  {t.content ? (
-                    <Markdown src={stripToolFences(t.content)} />
-                  ) : t.streaming && !t.reasoning ? (
-                    <div className="h-3 w-24 rounded shimmer" />
-                  ) : null}
+                  {(() => {
+                    const visible = stripToolFences(t.content);
+                    if (visible) return <Markdown src={visible} />;
+                    if (t.streaming) {
+                      return (
+                        <div className="rounded-lg border border-white/8 bg-ink-850/70 px-3 py-2 text-[12px] text-slate-400">
+                          Working through the next step...
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               </div>
             )}

@@ -13,7 +13,7 @@ import {
 } from "@/lib/fs/provider";
 import { FsWatcher, type WatchEvent } from "@/lib/fs/watcher";
 import { WorkspaceIndex } from "@/lib/index/workspaceIndex";
-import { Staging, executeTool, type ToolCall, type ToolResult } from "@/lib/ai/tools";
+import { Staging, executeTool, parseToolCalls, type ToolCall, type ToolResult } from "@/lib/ai/tools";
 import { runAgent } from "@/lib/ai/agent";
 import { buildSystemPrompt, INLINE_EDIT_PROMPT } from "@/lib/ai/prompt";
 import { completeOnce, estimateTokens, streamChat, type ChatMessage } from "@/lib/ai/nvidiaClient";
@@ -469,7 +469,12 @@ export const useIde = create<IdeState>((set, get) => ({
         onStep: (n) => set({ step: n }),
         onReasoning: (d) => patch((t) => ({ ...t, reasoning: (t.reasoning ?? "") + d })),
         onContent: (d) => patch((t) => ({ ...t, content: t.content + d })),
-        onAssistantDone: () => {},
+        onAssistantDone: () => {
+          // The model often streams tool JSON as normal assistant content. Keep
+          // the UI transcript human-readable while the agent's internal message
+          // history still receives the original raw tool call.
+          patch((t) => ({ ...t, content: parseToolCalls(t.content).prose }));
+        },
         onUsage: (u) => set({ totalTokens: get().totalTokens + (u.total_tokens ?? 0) }),
         onToolStart: (call) => patch((t) => ({ ...t, tools: [...(t.tools ?? []), { call }] })),
         onToolResult: (result) => {
