@@ -16,6 +16,8 @@ import CommandPalette, { type Command } from "@/components/CommandPalette";
 import StatusBar from "@/components/StatusBar";
 import Welcome from "@/components/Welcome";
 import { cn } from "@/utils/cn";
+import LandingAuth from "@/components/LandingAuth";
+import { loadAuth, saveAuth, type AuthUser } from "@/lib/auth";
 
 function useDrag(initial: number, min: number, max: number, invert = false) {
   const [size, setSize] = useState(initial);
@@ -58,11 +60,13 @@ const PANELS: { id: PanelTab; icon: any; label: string }[] = [
 export default function App() {
   const s = useIde();
   const [showSettings, setShowSettings] = useState(false);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(() => loadAuth());
   const [showSidebar, setShowSidebar] = useState(true);
   const left = useDrag(240, 180, 420);
   const right = useDrag(420, 320, 720, true);
 
-  useEffect(() => { s.boot(); }, []);
+  useEffect(() => { if (authUser) s.boot(); }, [authUser]);
+  useEffect(() => { if (authUser?.apiKey) s.setSettings({ apiKey: authUser.apiKey }); }, [authUser?.apiKey]);
 
   const commands: Command[] = useMemo(
     () => [
@@ -73,6 +77,7 @@ export default function App() {
       { id: "new", label: "New file…", run: () => { const n = prompt("File name:", "src/new-file.ts"); if (n) s.createEntry(n, "file"); } },
       { id: "team", label: "Start Seeker team on a task…", run: () => s.setPanel("swarm") },
       { id: "settings", label: "Open settings (API key)…", run: () => setShowSettings(true) },
+      { id: "logout", label: "Log out", run: () => { saveAuth(null); setAuthUser(null); } },
       { id: "sidebar", label: "Toggle file list", run: () => setShowSidebar((v) => !v) },
       ...PANELS.map((p) => ({ id: `panel-${p.id}`, label: `Show ${p.label}`, run: () => s.setPanel(p.id) })),
     ],
@@ -105,13 +110,15 @@ export default function App() {
 
   const Panel = { chat: ChatPanel, swarm: SwarmPanel, diff: DiffPanel, search: SearchPanel, problems: ProblemsPanel, blueprint: BlueprintPanel }[s.panel];
 
+  if (!authUser) return <LandingAuth onAuthed={setAuthUser} />;
+
   return (
     <div className="flex h-full flex-col overflow-hidden bg-[#0d0e12]">
       <div className="flex h-[44px] shrink-0 items-center gap-3 border-b border-white/6 bg-[#121418] px-4">
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-black font-bold text-[13px]">S</div>
           <span className="text-[14px] font-semibold tracking-tight text-white">Seeker Code</span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-medium text-slate-300">Seeker Pro 1.2</span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-medium text-slate-300">{authUser.tier} · {authUser.limits?.instanceLimit ?? 5} instances</span>
         </div>
 
         <div className="mx-1 h-4 w-px bg-white/10" />
@@ -133,6 +140,7 @@ export default function App() {
           <button onClick={() => setShowSettings(true)} className="rounded-full bg-white/5 p-2 text-slate-400 hover:bg-white/10 hover:text-white" title="Settings — API key">
             <Settings2 size={16} />
           </button>
+          <button onClick={() => { saveAuth(null); setAuthUser(null); }} className="rounded-full border border-white/10 px-3 py-1.5 text-[12px] text-slate-300 hover:bg-white/10">Log out</button>
         </div>
       </div>
 
