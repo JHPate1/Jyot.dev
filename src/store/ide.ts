@@ -383,6 +383,8 @@ export const useIde = create<IdeState>((set, get) => ({
 
   clearChat() {
     set({ chat: [], totalTokens: 0 });
+    const fs = get().fs;
+    if (fs) void persistSeekConfig(fs, { chat: [] });
   },
 
   stop() {
@@ -400,7 +402,9 @@ export const useIde = create<IdeState>((set, get) => ({
     const userTurn: ChatTurn = { id: rid(), role: "user", content: text, ts: Date.now(), contextPaths };
     const asstId = rid();
     const asst: ChatTurn = { id: asstId, role: "assistant", content: "", reasoning: "", tools: [], streaming: true, ts: Date.now() };
-    set({ chat: [...st.chat, userTurn, asst], running: true, abort, step: 0, panel: "chat" });
+    const nextChat = [...st.chat, userTurn, asst];
+    set({ chat: nextChat, running: true, abort, step: 0, panel: "chat" });
+    void persistSeekConfig(st.fs, { chat: nextChat });
 
     // ---- context assembly (local RAG) --------------------------------------
     const active = st.activeTab ? st.buffers[st.activeTab] : null;
@@ -529,6 +533,7 @@ export const useIde = create<IdeState>((set, get) => ({
             }));
             get().toast(`${staged.length} change(s) ready to review`, "info");
           }
+          void persistSeekConfig(get().fs, { chat: get().chat, checkpoints: get().checkpoints });
         },
       },
     });
@@ -687,13 +692,22 @@ export const useIde = create<IdeState>((set, get) => ({
       signal: abort.signal,
       callbacks: {
         onPlan: (summary, subtasks) => {
-          set((s) => ({
-            swarmPlanSummary: summary,
-            swarmEntries: s.swarmEntries.map((e) => {
-              const sub = subtasks.find((x) => x.agent === e.agentId);
-              return sub ? { ...e, status: "working", note: sub.objective.slice(0, 90) } : e;
-            }),
-          }));
+          set((s) => {
+            const existing = new Map(s.swarmEntries.map((e) => [e.agentId, e]));
+            const merged = [...s.swarmEntries];
+            for (const sub of subtasks) {
+              if (!existing.has(sub.agent)) {
+                merged.push({ agentId: sub.agent, status: "idle", note: "", file: "", step: 0, text: "", tools: [] });
+              }
+            }
+            return {
+              swarmPlanSummary: summary,
+              swarmEntries: merged.map((e) => {
+                const sub = subtasks.find((x) => x.agent === e.agentId);
+                return sub ? { ...e, status: "working", note: sub.objective.slice(0, 90) } : e;
+              }),
+            };
+          });
         },
         onBoard: (entries) =>
           set((s) => ({
@@ -730,11 +744,49 @@ export const useIde = create<IdeState>((set, get) => ({
           if (reason === "error") get().toast(detail ? `Swarm error: ${detail}` : "Swarm stopped", "error");
           else if (staged) get().toast(`${staged} file(s) staged by the team — review the diff`, "ok");
           else get().toast("Swarm finished", "ok");
+          void persistSeekConfig(get().fs, { chat: get().chat, checkpoints: get().checkpoints });
         },
       },
     });
   },
 }));
+
+const SEEK_CONFIG_PATH = ".seekconfig";
+const SEEK_CONFIG_VERSION = 1;
+
+type SeekConfigPatch = Partial<Pick<IdeState, "chat" | "checkpoints">>;
+
+async function loadSeekConfig(fs: VFS): Promise<Pick<IdeState, "chat" | "checkpoints">> {
+  try {
+    if (!(await fs.exists(SEEK_CONFIG_PATH))) return { chat: [], checkpoints: [] };
+    const parsed = JSON.parse(await fs.readFile(SEEK_CONFIG_PATH));
+    return {
+      chat: Array.isArray(parsed?.session?.chat)
+        ? parsed.session.chat.filter((t: any) => t && (t.role === "user" || t.role === "assistant" || t.role === "system")).slice(-80)
+        : [],
+      checkpoints: Array.isArray(parsed?.session?.checkpoints) ? parsed.session.checkpoints.slice(0, 12) : [],
+    };
+  } catch {
+    return { chat: [], checkpoints: [] };
+  }
+}
+
+async function persistSeekConfig(fs: VFS | null, patch: SeekConfigPatch): Promise<void> {
+  if (!fs || fs.readonly) return;
+  try {
+    const prev = await loadSeekConfig(fs);
+    const chat = (patch.chat ?? prev.chat).map((t) => ({
+      ...t,
+      streaming: false,
+      tools: undefined,
+      reasoning: t.reasoning ? t.reasoning.slice(-8000) : undefined,
+    })).slice(-80);
+    const checkpoints = (patch.checkpoints ?? prev.checkpoints).slice(0, 12);
+    await fs.writeFile(SEEK_CONFIG_PATH, JSON.stringify({ version: SEEK_CONFIG_VERSION, session: { chat, checkpoints }, updatedAt: new Date().toISOString() }, null, 2));
+  } catch {
+    /* Session persistence must never block editing or agent runs. */
+  }
+}
 
 function rid() {
   return Math.random().toString(36).slice(2, 10);
@@ -743,7 +795,8 @@ function rid() {
 async function attach(fs: VFS, set: any, get: () => IdeState) {
   watcher?.stop();
   const tree = await fs.listTree();
-  set({ fs, tree, backendLabel: fs.label, fsError: null, buffers: {}, openTabs: [], activeTab: null, externalChanges: [] });
+  const session = await loadSeekConfig(fs);
+  set({ fs, tree, backendLabel: fs.label, fsError: null, buffers: {}, openTabs: [], activeTab: null, externalChanges: [], chat: session.chat, checkpoints: session.checkpoints, totalTokens: 0 });
   get().index.clear();
 
   watcher = new FsWatcher(fs, {

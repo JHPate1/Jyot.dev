@@ -20,8 +20,8 @@
  *   KEYS_TABLE          DynamoDB table for API keys
  *   USAGE_TABLE         DynamoDB table for daily counters
  *   NVIDIA_KEY_PRO      nvapi-… for Seeker Pro 1.2
- *   NVIDIA_KEY_PERPLEX  nvapi-… for Seeker Perplex
- *   NVIDIA_KEY_FLASH    nvapi-… for Seeker Code Flash
+ *   NVIDIA_KEY_PERPLEX  nvapi-… for Seeker Perplex (Nemotron)
+ *   NVIDIA_KEY_FLASH    nvapi-… for Seeker Code Flash (Nemotron)
  *   NVIDIA_BASE_URL     default https://integrate.api.nvidia.com/v1
  *   ADMIN_SECRET        shared secret for /v1/admin/*
  *   DEFAULT_DAILY_LIMIT default 50
@@ -62,16 +62,16 @@ const MODEL_MAP = {
   "seeker-perplex": {
     publicId: "seeker-perplex",
     label: "Seeker Perplex",
-    nvidiaModel: "deepseek-ai/deepseek-v4-flash-0731",
+    nvidiaModel: "nvidia/nemotron-3-super-120b-a12b",
     nvidiaKeyEnv: "NVIDIA_KEY_PERPLEX",
-    defaultKwargs: { thinking: true, reasoning_effort: "high" },
+    defaultKwargs: { enable_thinking: true },
   },
   "seeker-code-flash": {
     publicId: "seeker-code-flash",
     label: "Seeker Code Flash",
-    nvidiaModel: "meta/llama-3.3-70b-instruct",
+    nvidiaModel: "nvidia/nemotron-3-super-120b-a12b",
     nvidiaKeyEnv: "NVIDIA_KEY_FLASH",
-    defaultKwargs: {},
+    defaultKwargs: { enable_thinking: false },
   },
 };
 

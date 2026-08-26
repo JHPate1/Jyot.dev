@@ -81,13 +81,15 @@ function firstObject(text: string): string | null {
 const PLAN_SYSTEM = `
 You are Seeker Pro 1.2, the lead architect of the Seeker Code team.
 
-You do NOT edit files yourself. You break the user's goal into 2-4 parallel subtasks that can run at the same time.
+You do NOT edit files yourself. You break the user's goal into the smallest useful set of parallel subtasks. Use 1 subtask for simple work and up to 60 only for genuinely independent work.
 
 Rules:
-- Each subtask goes to one teammate (by id) whose skills fit.
+- Each subtask goes to one teammate type by id whose skills fit; the runner may spin up multiple instances of that type.
 - Give each subtask different files to avoid conflicts.
 - Objectives must be clear and self-contained.
+- Do not overthink. Prefer fewer subtasks when dependencies or file conflicts are likely.
 - If the goal needs only one teammate, return one subtask.
+- Hard cap: no more than 20 instances of any one teammate type and no more than 60 subtasks total.
 - Respond with ONLY JSON, no prose, no fences:
 {"summary": "<one line plan>", "subtasks": [{"agent":"<id>","objective":"<what to do>","files":["<path>",...]}]}
 `.trim();
@@ -118,7 +120,7 @@ ${TOOL_SPEC}`;
 
 function boardTextOf(entries: SwarmEntry[], roster: AgentProfile[]): string {
   return entries.filter((e) => e.status !== "idle").map((e) => {
-    const a = roster.find((x) => x.id === e.agentId);
+    const a = roster.find((x) => x.id === e.agentId.split("#")[0]);
     return `- ${a?.short ?? e.agentId} [${e.status}] ${e.file ? `editing ${e.file} · ` : ""}${e.note}`;
   }).join("\n") || "(no teammates active yet)";
 }
@@ -159,11 +161,18 @@ export async function runSwarm(ctx: Ctx): Promise<void> {
     if (!obj) throw new Error("No plan returned.");
     const parsed = JSON.parse(obj);
     const validIds = new Set(roster.map((r) => r.id));
-    let subtasks: Subtask[] = (Array.isArray(parsed.subtasks) ? parsed.subtasks : []).map((s: any) => ({
-      agent: typeof s.agent === "string" && validIds.has(s.agent) ? s.agent : roster.find(r => !r.isArchitect)?.id ?? "seeker-perplex",
-      objective: String(s.objective ?? s.description ?? "Complete the task."),
-      files: Array.isArray(s.files) ? s.files.map(String) : [],
-    })).slice(0, 4);
+    const perAgentCount = new Map<string, number>();
+    let subtasks: Subtask[] = (Array.isArray(parsed.subtasks) ? parsed.subtasks : []).flatMap((s: any) => {
+      const agentId = typeof s.agent === "string" && validIds.has(s.agent) ? s.agent : roster.find(r => !r.isArchitect)?.id ?? "seeker-perplex";
+      const count = perAgentCount.get(agentId) ?? 0;
+      if (count >= 20) return [];
+      perAgentCount.set(agentId, count + 1);
+      return [{
+        agent: agentId,
+        objective: String(s.objective ?? s.description ?? "Complete the task."),
+        files: Array.isArray(s.files) ? s.files.map(String) : [],
+      }];
+    }).slice(0, 60);
     if (!subtasks.length) subtasks = [{ agent: roster.find(r => !r.isArchitect)?.id ?? "seeker-perplex", objective: task, files: [] }];
     plan = { summary: String(parsed.summary ?? "Split into parallel tasks."), subtasks };
   } catch (e: any) {
@@ -172,15 +181,27 @@ export async function runSwarm(ctx: Ctx): Promise<void> {
     return callbacks.onFinish("error", e.message);
   }
 
-  callbacks.onPlan(plan.summary, plan.subtasks);
+  const instanceCount = new Map<string, number>();
+  const expandedSubtasks = plan.subtasks.map((sub) => {
+    const count = (instanceCount.get(sub.agent) ?? 0) + 1;
+    instanceCount.set(sub.agent, count);
+    return { ...sub, agent: count === 1 ? sub.agent : `${sub.agent}#${count}` };
+  });
+  for (const sub of expandedSubtasks) {
+    if (!entries.some((e) => e.agentId === sub.agent)) {
+      entries.push({ agentId: sub.agent, status: "idle", note: "", file: "", step: 0, text: "", tools: [] });
+    }
+  }
+
+  callbacks.onPlan(plan.summary, expandedSubtasks);
   setBoard(architect.id, { status: "done", note: plan.summary });
 
   const assigned = new Map<string, Subtask[]>();
-  plan.subtasks.forEach((s) => assigned.set(s.agent, [...(assigned.get(s.agent) ?? []), s]));
+  expandedSubtasks.forEach((s) => assigned.set(s.agent, [...(assigned.get(s.agent) ?? []), s]));
   const busText = () => boardTextOf(entries, roster);
 
   const workers = [...assigned.entries()].map(([agentId, subs], idx) => {
-    const agent = roster.find((a) => a.id === agentId) ?? architect;
+    const agent = { ...(roster.find((a) => a.id === agentId.split("#")[0]) ?? architect), id: agentId };
     return sleep(idx * 450).then(() => runWorkers(agent, subs, ctx, entries, setBoard, busText));
   });
 

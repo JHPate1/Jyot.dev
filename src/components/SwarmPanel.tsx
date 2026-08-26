@@ -91,6 +91,12 @@ export default function SwarmPanel() {
   const source = agents.length ? agents : AGENTS;
   const roster = source.filter((a) => a.enabled || a.isArchitect);
   const entryBy = new Map(swarmEntries.map((e) => [e.agentId, e]));
+  const visible = swarmEntries.length
+    ? swarmEntries.map((e) => ({ entry: e, profile: roster.find((a) => a.id === e.agentId.split("#")[0]) ?? roster[0] }))
+    : roster.map((a) => ({
+        profile: a,
+        entry: entryBy.get(a.id) ?? ({ agentId: a.id, status: "idle", note: "", file: "", step: 0, text: "", tools: [] } satisfies SwarmEntry),
+      }));
 
   const launch = () => {
     const t = task.trim();
@@ -105,7 +111,7 @@ export default function SwarmPanel() {
         <Users size={16} className="text-indigo-400" />
         <div>
           <div className="text-[13.5px] font-semibold text-white">Seeker Team</div>
-          <div className="text-[11.5px] text-slate-400">3 assistants · already set up · no API setup needed</div>
+          <div className="text-[11.5px] text-slate-400">3 agent types · up to 20 instances each · Nemotron-backed</div>
         </div>
         {swarmRunning && (
           <button
@@ -165,20 +171,16 @@ export default function SwarmPanel() {
           </div>
         )}
 
-        {roster.map((a) => {
-          const entry =
-            entryBy.get(a.id) ??
-            ({
-              agentId: a.id,
-              status: "idle",
-              note: "",
-              file: "",
-              step: 0,
-              text: "",
-              tools: [],
-            } satisfies SwarmEntry);
-          return <AgentCard key={a.id} entry={entry} color={a.color} label={a.label} short={a.short} role={a.role} />;
-        })}
+        {visible.map(({ entry, profile }) => (
+          <AgentCard
+            key={entry.agentId}
+            entry={entry}
+            color={profile.color}
+            label={entry.agentId.includes("#") ? `${profile.label} ${entry.agentId.split("#")[1]}` : profile.label}
+            short={entry.agentId.includes("#") ? `${profile.short}${entry.agentId.split("#")[1]}` : profile.short}
+            role={profile.role}
+          />
+        ))}
 
         {!!staging.size && (
           <button
