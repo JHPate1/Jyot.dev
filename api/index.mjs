@@ -29,6 +29,7 @@
  */
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import {
   DynamoDBDocumentClient,
   GetCommand,
@@ -37,15 +38,18 @@ import {
   ScanCommand,
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { randomBytes, createHash } from "node:crypto";
+import { randomBytes, createHash, pbkdf2Sync, timingSafeEqual, randomUUID } from "node:crypto";
 
 // ── Config ──────────────────────────────────────────────────────────────────
 const KEYS_TABLE = process.env.KEYS_TABLE || "seeker-api-keys";
 const USAGE_TABLE = process.env.USAGE_TABLE || "seeker-api-usage";
+const USERS_TABLE = process.env.USERS_TABLE || "seeker-users";
 const NVIDIA_BASE = (process.env.NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1").replace(/\/$/, "");
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "";
 const DEFAULT_DAILY_LIMIT = Number(process.env.DEFAULT_DAILY_LIMIT || 50);
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
+const SES_FROM_EMAIL = process.env.SES_FROM_EMAIL || "";
+const APP_URL = process.env.APP_URL || "http://localhost:5173";
 
 /**
  * Internal model registry — public Seeker names map to real NVIDIA endpoints.
@@ -82,6 +86,15 @@ const LEGACY_ALIASES = {
   "meta/llama-3.3-70b-instruct": "seeker-code-flash",
 };
 
+
+const TIERS = {
+  free: { label: "Free", priceMonthly: 0, instanceLimit: 5, hourlyRequests: 5, weeklyRequests: 100, monthlyRequests: 1000 },
+  pro: { label: "Pro", priceMonthly: 19, instanceLimit: 20, hourlyRequests: 120, weeklyRequests: 2500, monthlyRequests: 25000 },
+  team: { label: "Team", priceMonthly: 49, instanceLimit: 60, hourlyRequests: 500, weeklyRequests: 10000, monthlyRequests: 100000 },
+};
+
+const ses = new SESClient({});
+
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
   marshallOptions: { removeUndefinedValues: true },
 });
@@ -101,6 +114,65 @@ const json = (status, body, extraHeaders = {}) => ({
 });
 
 const utcDay = () => new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function hashPassword(password, salt = randomBytes(16).toString("hex")) {
+  const hash = pbkdf2Sync(String(password), salt, 120000, 32, "sha256").toString("hex");
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password, stored) {
+  const [salt, hash] = String(stored || "").split(":");
+  if (!salt || !hash) return false;
+  const next = hashPassword(password, salt).split(":")[1];
+  return timingSafeEqual(Buffer.from(hash, "hex"), Buffer.from(next, "hex"));
+}
+
+function publicUser(user, apiKey) {
+  const tier = TIERS[user.tier || "free"] || TIERS.free;
+  return { id: user.userId, email: user.email, tier: user.tier || "free", verified: !!user.verified, apiKey, limits: tier };
+}
+
+function verificationCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+async function sendVerificationEmail(email, code) {
+  if (!SES_FROM_EMAIL) {
+    console.log(`SES_FROM_EMAIL not set; verification code for ${email}: ${code}`);
+    return;
+  }
+  await ses.send(new SendEmailCommand({
+    Source: SES_FROM_EMAIL,
+    Destination: { ToAddresses: [email] },
+    Message: {
+      Subject: { Data: "Verify your Seeker Code account" },
+      Body: {
+        Text: { Data: `Your Seeker Code verification code is ${code}. It expires in 15 minutes.\n\nOpen ${APP_URL} to finish setup.` },
+        Html: { Data: `<h1>Verify Seeker Code</h1><p>Your code is <strong>${code}</strong>.</p><p>It expires in 15 minutes.</p><p><a href="${APP_URL}">Open Seeker Code</a></p>` },
+      },
+    },
+  }));
+}
+
+function periodKey(kind, d = new Date()) {
+  const iso = d.toISOString();
+  if (kind === "hour") return `h#${iso.slice(0, 13)}`;
+  if (kind === "week") {
+    const date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    const day = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - day);
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    const week = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    return `w#${date.getUTCFullYear()}-${String(week).padStart(2, "0")}`;
+  }
+  if (kind === "month") return `m#${iso.slice(0, 7)}`;
+  return `d#${iso.slice(0, 10)}`;
+}
 
 function hashKey(raw) {
   return createHash("sha256").update(raw).digest("hex");
@@ -145,23 +217,30 @@ async function loadKey(rawKey) {
   return res.Item || null;
 }
 
-async function getUsage(keyHash, day = utcDay()) {
-  const res = await ddb.send(
-    new GetCommand({ TableName: USAGE_TABLE, Key: { keyHash, day } }),
-  );
+async function getUsage(keyHash, day = periodKey("day")) {
+  const res = await ddb.send(new GetCommand({ TableName: USAGE_TABLE, Key: { keyHash, day } }));
   return res.Item?.count ?? 0;
 }
 
-async function bumpUsage(keyHash, day = utcDay()) {
-  await ddb.send(
-    new UpdateCommand({
-      TableName: USAGE_TABLE,
-      Key: { keyHash, day },
-      UpdateExpression: "ADD #c :one SET updatedAt = :now",
-      ExpressionAttributeNames: { "#c": "count" },
-      ExpressionAttributeValues: { ":one": 1, ":now": new Date().toISOString() },
-    }),
-  );
+async function bumpUsage(keyHash, day = periodKey("day")) {
+  await ddb.send(new UpdateCommand({
+    TableName: USAGE_TABLE,
+    Key: { keyHash, day },
+    UpdateExpression: "ADD #c :one SET updatedAt = :now",
+    ExpressionAttributeNames: { "#c": "count" },
+    ExpressionAttributeValues: { ":one": 1, ":now": new Date().toISOString() },
+  }));
+}
+
+async function usageSnapshot(keyHash, tierName = "free") {
+  const tier = TIERS[tierName] || TIERS.free;
+  const keys = { hour: periodKey("hour"), week: periodKey("week"), month: periodKey("month") };
+  const [hour, week, month] = await Promise.all([getUsage(keyHash, keys.hour), getUsage(keyHash, keys.week), getUsage(keyHash, keys.month)]);
+  return { tier, keys, counts: { hour, week, month } };
+}
+
+async function bumpAllUsage(keyHash, keys) {
+  await Promise.all([bumpUsage(keyHash, keys.hour), bumpUsage(keyHash, keys.week), bumpUsage(keyHash, keys.month)]);
 }
 
 async function assertKey(rawKey) {
@@ -172,23 +251,18 @@ async function assertKey(rawKey) {
   if (record.active === false) {
     return { ok: false, status: 403, error: { message: "This Seeker API key has been disabled.", type: "key_disabled" } };
   }
-  const day = utcDay();
-  const used = await getUsage(record.keyHash, day);
-  const limit = Number(record.dailyLimit ?? DEFAULT_DAILY_LIMIT);
-  if (used >= limit) {
-    return {
-      ok: false,
-      status: 429,
-      error: {
-        message: `Daily limit reached (${limit} messages/day). Resets at midnight UTC.`,
-        type: "rate_limit_exceeded",
-        used,
-        limit,
-        resetsAt: `${day}T23:59:59Z`,
-      },
-    };
+  const usage = await usageSnapshot(record.keyHash, record.tier || "free");
+  const checks = [
+    ["hour", usage.counts.hour, usage.tier.hourlyRequests],
+    ["week", usage.counts.week, usage.tier.weeklyRequests],
+    ["month", usage.counts.month, usage.tier.monthlyRequests],
+  ];
+  const exceeded = checks.find(([, used, limit]) => used >= limit);
+  if (exceeded) {
+    const [window, used, limit] = exceeded;
+    return { ok: false, status: 429, error: { message: `${usage.tier.label} ${window}ly limit reached (${limit} requests).`, type: "rate_limit_exceeded", used, limit, window } };
   }
-  return { ok: true, record, used, limit, day };
+  return { ok: true, record, usage };
 }
 
 // ── Model resolution ────────────────────────────────────────────────────────
@@ -281,6 +355,54 @@ async function rewriteSseStream(upstreamBody, publicId) {
       reader.cancel().catch(() => {});
     },
   });
+}
+
+
+// ── Public auth routes ─────────────────────────────────────────────────────
+async function authRegister(body) {
+  const email = normalizeEmail(body.email);
+  const password = String(body.password || "");
+  if (!/^\S+@\S+\.\S+$/.test(email)) throw Object.assign(new Error("Enter a valid email."), { statusCode: 400 });
+  if (password.length < 8) throw Object.assign(new Error("Password must be at least 8 characters."), { statusCode: 400 });
+  const code = verificationCode();
+  const now = new Date().toISOString();
+  const existing = await ddb.send(new GetCommand({ TableName: USERS_TABLE, Key: { email } }));
+  const user = existing.Item || { email, userId: randomUUID(), tier: "free", createdAt: now };
+  await ddb.send(new PutCommand({ TableName: USERS_TABLE, Item: { ...user, passwordHash: hashPassword(password), verified: false, verifyCodeHash: hashKey(code), verifyExpiresAt: Date.now() + 15 * 60 * 1000, updatedAt: now } }));
+  await sendVerificationEmail(email, code);
+  return { ok: true, message: "Verification email sent. Enter the 6-digit code to activate your free tier." };
+}
+
+async function createUserKey(user) {
+  if (user.apiKeyHash) {
+    await ddb.send(new UpdateCommand({ TableName: KEYS_TABLE, Key: { keyHash: user.apiKeyHash }, UpdateExpression: "SET active = :a, updatedAt = :n", ExpressionAttributeValues: { ":a": false, ":n": new Date().toISOString() } })).catch(() => {});
+  }
+  const raw = mintKey();
+  const keyHash = hashKey(raw);
+  const now = new Date().toISOString();
+  await ddb.send(new PutCommand({ TableName: KEYS_TABLE, Item: { keyHash, keyPrefix: raw.slice(0, 16) + "…", label: `${user.email} (${user.tier || "free"})`, tier: user.tier || "free", active: true, createdAt: now, updatedAt: now, ownerEmail: user.email, userId: user.userId } }));
+  await ddb.send(new UpdateCommand({ TableName: USERS_TABLE, Key: { email: user.email }, UpdateExpression: "SET apiKeyHash = :h, keyPrefix = :p, verified = :v, updatedAt = :n REMOVE verifyCodeHash, verifyExpiresAt", ExpressionAttributeValues: { ":h": keyHash, ":p": raw.slice(0, 16) + "…", ":v": true, ":n": now }, ReturnValues: "ALL_NEW" }));
+  return raw;
+}
+
+async function authVerify(body) {
+  const email = normalizeEmail(body.email);
+  const code = String(body.code || "").trim();
+  const res = await ddb.send(new GetCommand({ TableName: USERS_TABLE, Key: { email } }));
+  const user = res.Item;
+  if (!user || !user.verifyCodeHash || user.verifyCodeHash !== hashKey(code) || Number(user.verifyExpiresAt || 0) < Date.now()) throw Object.assign(new Error("Invalid or expired verification code."), { statusCode: 400 });
+  const apiKey = await createUserKey(user);
+  return { user: publicUser({ ...user, verified: true }, apiKey) };
+}
+
+async function authLogin(body) {
+  const email = normalizeEmail(body.email);
+  const res = await ddb.send(new GetCommand({ TableName: USERS_TABLE, Key: { email } }));
+  const user = res.Item;
+  if (!user || !verifyPassword(String(body.password || ""), user.passwordHash)) throw Object.assign(new Error("Email or password is incorrect."), { statusCode: 401 });
+  if (!user.verified) throw Object.assign(new Error("Verify your email before logging in."), { statusCode: 403 });
+  const apiKey = await createUserKey(user);
+  return { user: publicUser(user, apiKey) };
 }
 
 // ── Admin routes ────────────────────────────────────────────────────────────
@@ -381,6 +503,10 @@ export const handler = awslambda.streamifyResponse(async (event, responseStream)
   }
 
   try {
+    if ((path === "/auth/register" || path === "/v1/auth/register") && method === "POST") return writeJson(responseStream, 201, await authRegister(parseBody(event)));
+    if ((path === "/auth/verify" || path === "/v1/auth/verify") && method === "POST") return writeJson(responseStream, 200, await authVerify(parseBody(event)));
+    if ((path === "/auth/login" || path === "/v1/auth/login") && method === "POST") return writeJson(responseStream, 200, await authLogin(parseBody(event)));
+
     // ── Admin ──────────────────────────────────────────────────────────────
     if (path === "/v1/admin/keys" && method === "POST") {
       if (!assertAdmin(event)) return writeJson(responseStream, 401, { error: { message: "Unauthorized" } });
@@ -419,10 +545,8 @@ export const handler = awslambda.streamifyResponse(async (event, responseStream)
     // ── Usage ──────────────────────────────────────────────────────────────
     if (path === "/v1/usage" && method === "GET") {
       return writeJson(responseStream, 200, {
-        day: gate.day,
-        used: gate.used,
-        limit: gate.limit,
-        remaining: Math.max(0, gate.limit - gate.used),
+        usage: gate.usage.counts,
+        limits: gate.usage.tier,
         label: gate.record.label,
       });
     }
@@ -456,13 +580,13 @@ export const handler = awslambda.streamifyResponse(async (event, responseStream)
       }
 
       // Count the message only after upstream accepted it
-      await bumpUsage(gate.record.keyHash, gate.day);
+      await bumpAllUsage(gate.record.keyHash, gate.usage.keys);
 
       if (!stream) {
         const data = await upstream.json();
         if (data.model) data.model = resolved.entry.publicId;
         return writeJson(responseStream, 200, data, {
-          "X-Seeker-Remaining": String(Math.max(0, gate.limit - gate.used - 1)),
+          "X-Seeker-Remaining": String(Math.max(0, gate.usage.tier.monthlyRequests - gate.usage.counts.month - 1)),
         });
       }
 
@@ -474,7 +598,7 @@ export const handler = awslambda.streamifyResponse(async (event, responseStream)
           "Cache-Control": "no-cache, no-transform",
           "Access-Control-Allow-Origin": CORS_ORIGIN,
           "Access-Control-Expose-Headers": "X-Seeker-Remaining, X-Seeker-Model",
-          "X-Seeker-Remaining": String(Math.max(0, gate.limit - gate.used - 1)),
+          "X-Seeker-Remaining": String(Math.max(0, gate.usage.tier.monthlyRequests - gate.usage.counts.month - 1)),
           "X-Seeker-Model": resolved.entry.publicId,
           "X-Accel-Buffering": "no",
         },
