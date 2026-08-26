@@ -30,7 +30,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
           Authorization: `Bearer ${key}`,
         },
         body: JSON.stringify({
-          model: "meta/llama-3.3-70b-instruct",
+          model: "nvidia/nemotron-3-super-120b-a12b",
           messages: [{ role: "user", content: "hi" }],
           max_tokens: 4,
           stream: false,
