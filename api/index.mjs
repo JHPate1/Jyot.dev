@@ -36,7 +36,6 @@ import {
   PutCommand,
   UpdateCommand,
   ScanCommand,
-  QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { randomBytes, createHash, pbkdf2Sync, timingSafeEqual, randomUUID } from "node:crypto";
 
@@ -86,7 +85,6 @@ const LEGACY_ALIASES = {
   "meta/llama-3.3-70b-instruct": "seeker-code-flash",
 };
 
-
 const TIERS = {
   free: { label: "Free", priceMonthly: 0, instanceLimit: 5, hourlyRequests: 5, weeklyRequests: 100, monthlyRequests: 1000 },
   pro: { label: "Pro", priceMonthly: 19, instanceLimit: 20, hourlyRequests: 120, weeklyRequests: 2500, monthlyRequests: 25000 },
@@ -114,7 +112,6 @@ const json = (status, body, extraHeaders = {}) => ({
 });
 
 const utcDay = () => new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-
 
 function normalizeEmail(email) {
   return String(email || "").trim().toLowerCase();
@@ -191,8 +188,17 @@ function extractBearer(event) {
 }
 
 function pathOf(event) {
-  // Works for both REST API and HTTP API (v2)
-  return (event.rawPath || event.path || "/").replace(/\/+$/, "") || "/";
+  // HTTP API v2: rawPath includes stage (e.g. /prod/v1/models)
+  // REST API v1: path may or may not include stage
+  // Strip the stage prefix so routes match /v1/...
+  const stage = event.requestContext?.stage || "";
+  let raw = event.rawPath || event.path || "/";
+
+  if (stage && raw.startsWith(`/${stage}`)) {
+    raw = raw.slice(stage.length + 1) || "/";
+  }
+
+  return raw.replace(/\/+$/, "") || "/";
 }
 
 function methodOf(event) {
@@ -356,7 +362,6 @@ async function rewriteSseStream(upstreamBody, publicId) {
     },
   });
 }
-
 
 // ── Public auth routes ─────────────────────────────────────────────────────
 async function authRegister(body) {
