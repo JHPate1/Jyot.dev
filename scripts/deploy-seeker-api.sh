@@ -10,6 +10,9 @@ FN_NAME="${FN_NAME:-seeker-api}"
 ROLE_NAME="${ROLE_NAME:-seeker-api-role}"
 KEYS_TABLE="${KEYS_TABLE:-seeker-api-keys}"
 USAGE_TABLE="${USAGE_TABLE:-seeker-api-usage}"
+USERS_TABLE="${USERS_TABLE:-seeker-users}"
+SES_FROM_EMAIL="${SES_FROM_EMAIL:-}"
+APP_URL="${APP_URL:-http://localhost:5173}"
 DEFAULT_DAILY_LIMIT="${DEFAULT_DAILY_LIMIT:-50}"
 ADMIN_SECRET="${ADMIN_SECRET:-$(openssl rand -hex 24)}"
 NVIDIA_KEY_PRO="${NVIDIA_KEY_PRO:-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}"
@@ -55,6 +58,7 @@ create_table() {
 
 create_table "$KEYS_TABLE" keyHash
 create_table "$USAGE_TABLE" keyHash day
+create_table "$USERS_TABLE" email
 
 # TTL on usage so old days expire automatically (optional attribute)
 aws dynamodb update-time-to-live --table-name "$USAGE_TABLE" --region "$REGION" \
@@ -79,8 +83,13 @@ if ! aws iam get-role --role-name "$ROLE_NAME" >/dev/null 2>&1; then
     "Action": ["dynamodb:GetItem","dynamodb:PutItem","dynamodb:UpdateItem","dynamodb:Scan","dynamodb:Query"],
     "Resource": [
       "arn:aws:dynamodb:${REGION}:${ACCOUNT}:table/${KEYS_TABLE}",
-      "arn:aws:dynamodb:${REGION}:${ACCOUNT}:table/${USAGE_TABLE}"
+      "arn:aws:dynamodb:${REGION}:${ACCOUNT}:table/${USAGE_TABLE}",
+      "arn:aws:dynamodb:${REGION}:${ACCOUNT}:table/${USERS_TABLE}"
     ]
+  }, {
+    "Effect": "Allow",
+    "Action": ["ses:SendEmail"],
+    "Resource": "*"
   }]
 }
 EOF
@@ -102,11 +111,12 @@ zip -qr /tmp/seeker-api.zip index.mjs package.json node_modules
 popd >/dev/null
 
 ENV_JSON=$(jq -n \
-  --arg kt "$KEYS_TABLE" --arg ut "$USAGE_TABLE" \
+  --arg kt "$KEYS_TABLE" --arg ut "$USAGE_TABLE" --arg users "$USERS_TABLE" \
   --arg kp "$NVIDIA_KEY_PRO" --arg kx "$NVIDIA_KEY_PERPLEX" --arg kf "$NVIDIA_KEY_FLASH" \
-  --arg adm "$ADMIN_SECRET" --arg lim "$DEFAULT_DAILY_LIMIT" --arg cors "$CORS_ORIGIN" \
+  --arg adm "$ADMIN_SECRET" --arg lim "$DEFAULT_DAILY_LIMIT" --arg cors "$CORS_ORIGIN" --arg ses "$SES_FROM_EMAIL" --arg app "$APP_URL" \
   '{Variables:{
-    KEYS_TABLE:$kt, USAGE_TABLE:$ut,
+    KEYS_TABLE:$kt, USAGE_TABLE:$ut, USERS_TABLE:$users,
+    SES_FROM_EMAIL:$ses, APP_URL:$app,
     NVIDIA_KEY_PRO:$kp, NVIDIA_KEY_PERPLEX:$kx, NVIDIA_KEY_FLASH:$kf,
     NVIDIA_BASE_URL:"https://integrate.api.nvidia.com/v1",
     ADMIN_SECRET:$adm, DEFAULT_DAILY_LIMIT:$lim, CORS_ORIGIN:$cors
@@ -176,6 +186,7 @@ echo
 c "════════════════════════════════════════════════════════════════"
 c "  Seeker API is live"
 c "  Base URL     : ${URL}/v1"
+if [[ -n "$SES_FROM_EMAIL" ]]; then c "  SES sender   : ${SES_FROM_EMAIL}"; else w "  SES sender   : not set — auth emails will log codes only"; fi
 c "  Models       : ${URL}/v1/models"
 c "  Admin secret : ${ADMIN_SECRET}"
 if [[ -n "$DEMO_KEY" ]]; then
@@ -185,8 +196,7 @@ fi
 c "════════════════════════════════════════════════════════════════"
 echo
 w "Next: set these Amplify / local env vars:"
-echo "  VITE_SEEKER_API_URL=${URL}/v1"
-echo "  VITE_SEEKER_API_KEY=${DEMO_KEY:-sk_seeker_...}"
+echo "  VITE_SEEKER_API_BASE_URL=${URL}/v1"
 echo
 w "Create more keys anytime:"
 echo "  export SEEKER_API_URL=${URL}"
