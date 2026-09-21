@@ -587,46 +587,28 @@
 
     <div class="divider max-w-5xl mx-auto"></div>
 
-    <section class="py-14 md:py-20 px-6" id="contact">
+     <section class="py-14 md:py-20 px-6" id="contact">
         <div class="max-w-5xl mx-auto">
             <div class="reveal">
                 <div class="section-label">Contact</div>
                 <h2 class="section-title">Get in touch</h2>
             </div>
-            <div class="grid lg:grid-cols-2 gap-8 md:gap-10 mt-8 md:mt-10">
-                <div class="reveal reveal-d1">
-                    <p class="text-zinc-500 leading-relaxed text-sm md:text-base">
-                        Want to talk about something, or just say hi? Send a message. I check my email more than I probably should.
-                    </p>
-                    <address class="mt-6 space-y-3 not-italic">
-                        <div class="flex items-center gap-2.5"><iconify-icon icon="lucide:mail" width="14" class="text-zinc-600"></iconify-icon><span class="mono text-sm text-zinc-400">hello@jyot.dev</span></div>
-                        <div class="flex items-center gap-2.5"><iconify-icon icon="lucide:map-pin" width="14" class="text-zinc-600"></iconify-icon><span class="text-sm text-zinc-400">United States</span></div>
-                    </address>
-                    <div class="flex gap-2.5 mt-6">
-                        <a href="#" class="social-icon" aria-label="GitHub" rel="me"><iconify-icon icon="lucide:github" width="16"></iconify-icon></a>
-                        <a href="mailto:hello@jyot.dev" class="social-icon" aria-label="Email"><iconify-icon icon="lucide:mail" width="16"></iconify-icon></a>
+            <div class="mt-8 max-w-xl">
+                <form action="https://formspree.io/f/xaenezkq" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-xs mono text-zinc-500 mb-1">NAME</label>
+                        <input type="text" name="name" required class="form-input" placeholder="Your Name">
                     </div>
-                </div>
-                <div class="reveal reveal-d2">
-                    <form id="contact-form" class="space-y-3.5">
-                        <div>
-                            <label class="mono text-xs text-zinc-600 block mb-1">Name</label>
-                            <input type="text" name="name" required placeholder="Your name" class="form-input w-full bg-surface-card border border-surface-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="mono text-xs text-zinc-600 block mb-1">Email</label>
-                            <input type="email" name="email" required placeholder="you@example.com" class="form-input w-full bg-surface-card border border-surface-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="mono text-xs text-zinc-600 block mb-1">Message</label>
-                            <textarea name="message" required rows="4" placeholder="What's up?" class="form-input w-full bg-surface-card border border-surface-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none resize-none"></textarea>
-                        </div>
-                        <button type="submit" class="cta-btn w-full sm:w-auto justify-center">Send<iconify-icon icon="lucide:send" width="14"></iconify-icon></button>
-                    </form>
-                    <div id="form-success" class="hidden mt-3 p-3.5 rounded-xl bg-accent/5 border border-accent/15">
-                        <p class="text-accent text-sm flex items-center gap-2"><iconify-icon icon="lucide:check-circle" width="16"></iconify-icon>Got it. I'll reply when I can.</p>
+                    <div>
+                        <label class="block text-xs mono text-zinc-500 mb-1">EMAIL</label>
+                        <input type="email" name="email" required class="form-input" placeholder="your@email.com">
                     </div>
-                </div>
+                    <div>
+                        <label class="block text-xs mono text-zinc-500 mb-1">MESSAGE</label>
+                        <textarea name="message" rows="4" required class="form-input" placeholder="Say hello..."></textarea>
+                    </div>
+                    <button type="submit" class="cta-btn w-full justify-center">Send Message</button>
+                </form>
             </div>
         </div>
     </section>
