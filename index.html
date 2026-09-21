@@ -181,6 +181,7 @@
             color: #0a0a0f; font-weight: 600; font-size: 0.8125rem; padding: 0.625rem 1.5rem;
             border-radius: 10px; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             text-decoration: none; position: relative; overflow: hidden; -webkit-tap-highlight-color: transparent;
+            cursor: pointer; border: none;
         }
         .cta-btn:hover { background: #67e8f9; box-shadow: 0 0 24px rgba(34, 211, 238, 0.25); transform: translateY(-1px); }
         .cta-btn:active { transform: translateY(0); }
@@ -237,10 +238,75 @@
         .mono { font-family: 'JetBrains Mono', monospace; }
 
         input, textarea { font-family: 'Inter', sans-serif; font-size: 16px; }
-        .form-input { transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease; }
+        .form-input { 
+            width: 100%;
+            background: #12121a;
+            border: 1px solid #1e1e2a;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: #e4e4e7;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease; 
+        }
         .form-input:focus {
             border-color: rgba(34, 211, 238, 0.3) !important;
             box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.06); background: #1a1a24 !important;
+        }
+
+        /* ══ CUSTOM DIALOG MODAL ══ */
+        .dialog-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(10, 10, 15, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .dialog-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .dialog-card {
+            background: #16161f;
+            border: 1px solid #1e1e2a;
+            border-radius: 16px;
+            padding: 2rem 1.75rem;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(34, 211, 238, 0.08);
+            transform: scale(0.92);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .dialog-overlay.active .dialog-card {
+            transform: scale(1);
+        }
+        .dialog-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            font-size: 28px;
+        }
+        .dialog-icon.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.25);
+        }
+        .dialog-icon.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.25);
         }
 
         /* ══ NIGHT SKY ══ */
@@ -587,14 +653,14 @@
 
     <div class="divider max-w-5xl mx-auto"></div>
 
-     <section class="py-14 md:py-20 px-6" id="contact">
+    <section class="py-14 md:py-20 px-6" id="contact">
         <div class="max-w-5xl mx-auto">
             <div class="reveal">
                 <div class="section-label">Contact</div>
                 <h2 class="section-title">Get in touch</h2>
             </div>
             <div class="mt-8 max-w-xl">
-                <form action="https://formspree.io/f/xaenezkq" method="POST" class="space-y-4">
+                <form id="contact-form" action="https://formspree.io/f/xaenezkq" method="POST" class="space-y-4">
                     <div>
                         <label class="block text-xs mono text-zinc-500 mb-1">NAME</label>
                         <input type="text" name="name" required class="form-input" placeholder="Your Name">
@@ -607,7 +673,7 @@
                         <label class="block text-xs mono text-zinc-500 mb-1">MESSAGE</label>
                         <textarea name="message" rows="4" required class="form-input" placeholder="Say hello..."></textarea>
                     </div>
-                    <button type="submit" class="cta-btn w-full justify-center">Send Message</button>
+                    <button type="submit" id="contact-submit-btn" class="cta-btn w-full justify-center">Send Message</button>
                 </form>
             </div>
         </div>
@@ -626,6 +692,16 @@
     </footer>
 
     <a href="#hero" class="back-to-top" id="back-to-top" aria-label="Back to top"><iconify-icon icon="lucide:arrow-up" width="18"></iconify-icon></a>
+
+    <!-- Custom Contact Feedback Dialog -->
+    <div class="dialog-overlay" id="contact-dialog-overlay">
+        <div class="dialog-card">
+            <div class="dialog-icon" id="dialog-icon"></div>
+            <h3 class="text-xl font-semibold mb-2" id="dialog-title">Status</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-6" id="dialog-message"></p>
+            <button type="button" class="cta-btn w-full justify-center" id="dialog-close-btn">Close</button>
+        </div>
+    </div>
 
     <!-- Easter egg layers -->
     <div class="toast-container" id="toast-container"></div>
@@ -726,12 +802,76 @@
         }
         window.addEventListener('scroll', onScroll, { passive: true });
 
-        // ══ CONTACT FORM ══
-        document.getElementById('contact-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            this.style.display = 'none';
-            document.getElementById('form-success').classList.remove('hidden');
+        // ══ CONTACT FORM AJAX & DIALOG ══
+        const contactForm = document.getElementById('contact-form');
+        const dialogOverlay = document.getElementById('contact-dialog-overlay');
+        const dialogIcon = document.getElementById('dialog-icon');
+        const dialogTitle = document.getElementById('dialog-title');
+        const dialogMsg = document.getElementById('dialog-message');
+        const dialogClose = document.getElementById('dialog-close-btn');
+
+        function showDialog(isSuccess, message) {
+            if (isSuccess) {
+                dialogIcon.className = 'dialog-icon success';
+                dialogIcon.innerHTML = '<iconify-icon icon="lucide:check-circle-2"></iconify-icon>';
+                dialogTitle.textContent = 'Submitted!';
+                dialogTitle.style.color = '#22c55e';
+            } else {
+                dialogIcon.className = 'dialog-icon error';
+                dialogIcon.innerHTML = '<iconify-icon icon="lucide:alert-circle"></iconify-icon>';
+                dialogTitle.textContent = 'Submission Failed';
+                dialogTitle.style.color = '#ef4444';
+            }
+            dialogMsg.textContent = message;
+            dialogOverlay.classList.add('active');
+        }
+
+        dialogClose.addEventListener('click', () => {
+            dialogOverlay.classList.remove('active');
         });
+        dialogOverlay.addEventListener('click', (e) => {
+            if (e.target === dialogOverlay) {
+                dialogOverlay.classList.remove('active');
+            }
+        });
+
+        if (contactForm) {
+            contactForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const submitBtn = document.getElementById('contact-submit-btn');
+                const originalText = submitBtn.innerHTML;
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<iconify-icon icon="lucide:loader-2" class="animate-spin" width="18"></iconify-icon> Sending...';
+
+                try {
+                    const response = await fetch(contactForm.action, {
+                        method: 'POST',
+                        body: new FormData(contactForm),
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        showDialog(true, 'Your message has been sent successfully. I will get back to you as soon as possible!');
+                        contactForm.reset();
+                    } else {
+                        const data = await response.json();
+                        if (data && data.errors) {
+                            showDialog(false, data.errors.map(err => err.message).join(', '));
+                        } else {
+                            showDialog(false, 'Failed to send message. Please check your inputs and try again.');
+                        }
+                    }
+                } catch (error) {
+                    showDialog(false, 'Network connection error. Please check your internet connection and try again.');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            });
+        }
 
         // ══ CUSTOM CURSOR (desktop only) ══
         const cursor = document.getElementById('cursor');
